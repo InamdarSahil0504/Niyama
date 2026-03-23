@@ -53,7 +53,7 @@ export default function Dashboard({ session }) {
     const [streak, setStreak] = useState(null)
     const [todayHabits, setTodayHabits] = useState(null)
     const [loading, setLoading] = useState(true)
-    const [saving, setSaving] = useState(false)
+    const [saving, setSaving] = useState(null)
     const [tierSelected, setTierSelected] = useState(false)
     const [activeTab, setActiveTab] = useState('home')
     const [habits, setHabits] = useState({
@@ -138,7 +138,36 @@ export default function Dashboard({ session }) {
 
         setLoading(false)
     }
+    async function saveDraft() {
+        setSaving('draft')
+        const userId = session.user.id
 
+        if (todayHabits) {
+            await supabase
+                .from('habits')
+                .update({
+                    ...habits,
+                    day_successful: false,
+                    points_earned: 0,
+                    submitted: false,
+                })
+                .eq('id', todayHabits.id)
+        } else {
+            await supabase
+                .from('habits')
+                .insert({
+                    user_id: userId,
+                    date: today,
+                    ...habits,
+                    day_successful: false,
+                    points_earned: 0,
+                    submitted: false,
+                })
+        }
+
+        await fetchData()
+        setSaving(null)
+    }
     async function saveHabits() {
         setSaving(true)
         const userId = session.user.id
@@ -147,12 +176,12 @@ export default function Dashboard({ session }) {
 
         if (todayHabits) {
             await supabase.from('habits').update({
-                ...habits, day_successful: daySuccessful, points_earned: points,
+                ...habits, day_successful: daySuccessful, points_earned: points, submitted: true,
             }).eq('id', todayHabits.id)
         } else {
             await supabase.from('habits').insert({
                 user_id: userId, date: today, ...habits,
-                day_successful: daySuccessful, points_earned: points,
+                day_successful: daySuccessful, points_earned: points, submitted: true,
             })
         }
 
@@ -191,7 +220,7 @@ export default function Dashboard({ session }) {
         }).eq('id', userId)
 
         await fetchData()
-        setSaving(false)
+        setSaving(null)
     }
 
     async function signOut() {
@@ -305,8 +334,8 @@ export default function Dashboard({ session }) {
                                             <input
                                                 type="checkbox"
                                                 checked={habits[habit.key]}
-                                                onChange={e => !todayHabits && setHabits({ ...habits, [habit.key]: e.target.checked })}
-                                                disabled={!!todayHabits}
+                                                onChange={e => !todayHabits?.submitted && setHabits({ ...habits, [habit.key]: e.target.checked })}
+                                                disabled={!!todayHabits?.submitted}
                                                 className="w-5 h-5 rounded accent-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                                             />
                                             <span className={habits[habit.key] ? 'text-white' : 'text-gray-400'}>
@@ -339,24 +368,33 @@ export default function Dashboard({ session }) {
                                 </div>
                             </div>
 
-                            {todayHabits ? (
+                            {todayHabits?.submitted ? (
                                 <div className="w-full mt-4 bg-gray-800 text-gray-500 font-semibold py-3 rounded-lg text-center text-sm">
                                     ✓ Submitted for today
                                 </div>
                             ) : (
                                 <>
-                                    <div className="border-l-4 border-indigo-500 bg-gray-800 rounded-r-lg p-3 mt-4">
+                                    <div className="flex gap-2 mt-4">
+                                        <button
+                                            onClick={saveDraft}
+                                            disabled={saving}
+                                            className="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 rounded-lg transition text-sm"
+                                        >
+                                            {saving === 'draft' ? 'Saving...' : 'Save habits'}
+                                        </button>
+                                        <button
+                                            onClick={saveHabits}
+                                            disabled={saving}
+                                            className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-lg transition text-sm"
+                                        >
+                                            {saving === 'submit' ? 'Submitting...' : "Submit today's habits"}
+                                        </button>
+                                    </div>
+                                    <div className="border-l-4 border-indigo-500 bg-gray-800 rounded-r-lg p-3 mt-3">
                                         <p className="text-slate-300 text-xs leading-relaxed">
-                                            ✏️ <span className="text-white font-medium">Heads up!</span> Once saved, today's log is final. Review before submitting.
+                                            ✏️ <span className="text-white font-medium">Heads up!</span> Once submitted, today's log is final. Review before submitting.
                                         </p>
                                     </div>
-                                    <button
-                                        onClick={saveHabits}
-                                        disabled={saving}
-                                        className="w-full mt-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-lg transition"
-                                    >
-                                        {saving ? 'Saving...' : "Submit today's habits"}
-                                    </button>
                                 </>
                             )}
                         </div>
