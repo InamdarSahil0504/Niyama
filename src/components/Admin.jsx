@@ -13,6 +13,10 @@ export default function Admin() {
     const [adjustAmount, setAdjustAmount] = useState('')
     const [adjustReason, setAdjustReason] = useState('')
     const [message, setMessage] = useState('')
+    const [showMetrics, setShowMetrics] = useState(false)
+    const [metrics, setMetrics] = useState(null)
+    const [npsScore, setNpsScore] = useState('')
+    const [savingNps, setSavingNps] = useState(false)
 
     function handleLogin() {
         if (password === ADMIN_PASSWORD) {
@@ -22,7 +26,96 @@ export default function Admin() {
             setMessage('Incorrect password')
         }
     }
+    async function fetchMetrics() {
+        const { data: allProfiles } = await supabase
+            .from('profiles')
+            .select('*')
 
+        const { data: allHabits } = await supabase
+            .from('habits')
+            .select('*')
+
+        const { data: allStreaks } = await supabase
+            .from('streaks')
+            .select('*')
+
+        if (!allProfiles || !allHabits) return
+
+        const totalUsers = allProfiles.length
+        const freeUsers = allProfiles.filter(p => p.tier === 'free').length
+        const paidUsers = allProfiles.filter(p => p.tier !== 'free').length
+
+        // Daily active rate — users active in last 24 hours
+        const yesterday = new Date()
+        yesterday.setDate(yesterday.getDate() - 1)
+        const activeToday = allProfiles.filter(p =>
+            p.last_active_date && new Date(p.last_active_date) >= yesterday
+        ).length
+        const dailyActiveRate = totalUsers > 0
+            ? Math.round((activeToday / totalUsers) * 100)
+            : 0
+
+        // Habit completion rate — successful days / total logged days
+        const totalLogged = allHabits.length
+        const totalSuccessful = allHabits.filter(h => h.day_successful).length
+        const habitCompletionRate = totalLogged > 0
+            ? Math.round((totalSuccessful / totalLogged) * 100)
+            : 0
+
+        // Free to paid conversion
+        const conversionRate = totalUsers > 0
+            ? Math.round((paidUsers / totalUsers) * 100)
+            : 0
+
+        // Monthly churn — users inactive for 30+ days
+        const thirtyDaysAgo = new Date()
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+        const churned = allProfiles.filter(p =>
+            p.last_active_date && new Date(p.last_active_date) < thirtyDaysAgo
+        ).length
+        const churnRate = totalUsers > 0
+            ? Math.round((churned / totalUsers) * 100)
+            : 0
+
+        // Fetch saved NPS from database
+        const { data: npsData } = await supabase
+            .from('admin_adjustments')
+            .select('reason')
+            .eq('adjustment', 0)
+            .eq('reason', 'nps_score')
+            .order('created_at', { ascending: false })
+            .limit(1)
+
+        const savedNps = npsData?.[0]?.adjustment || null
+
+        setMetrics({
+            totalUsers,
+            freeUsers,
+            paidUsers,
+            activeToday,
+            dailyActiveRate,
+            habitCompletionRate,
+            conversionRate,
+            churnRate,
+            totalLogged,
+            totalSuccessful,
+            savedNps,
+        })
+    }
+    async function saveNps() {
+        if (!npsScore) return
+        setSavingNps(true)
+        await supabase
+            .from('admin_adjustments')
+            .insert({
+                user_id: users[0]?.id,
+                adjustment: parseInt(npsScore),
+                reason: 'nps_score',
+            })
+        setSavingNps(false)
+        setNpsScore('')
+        fetchMetrics()
+    }
     async function fetchData() {
         setLoading(true)
 
@@ -154,14 +247,169 @@ export default function Admin() {
                     <h1 className="text-2xl font-bold">Admin Panel</h1>
                     <p className="text-gray-400 text-sm">{users.length} users total</p>
                 </div>
-                <button
-                    onClick={fetchData}
-                    className="text-indigo-400 text-sm hover:text-indigo-300"
-                >
-                    Refresh
-                </button>
+                <div className="flex gap-3">
+                    <button
+                        onClick={() => { setShowMetrics(!showMetrics); if (!metrics) fetchMetrics() }}
+                        className={`text-sm px-4 py-2 rounded-lg transition ${showMetrics ? 'bg-indigo-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`}
+                    >
+                        Metrics
+                    </button>
+                    <button
+                        onClick={fetchData}
+                        className="text-indigo-400 text-sm hover:text-indigo-300"
+                    >
+                        Refresh
+                    </button>
+                </div>
             </div>
+            {showMetrics && metrics && (
+                <div className="bg-gray-900 rounded-2xl p-6 mb-6">
+                    <h2 className="text-lg font-semibold mb-6">Key metrics</h2>
 
+                    {/* Overview stats */}
+                    <div className="grid grid-cols-3 gap-3 mb-6">
+                        <div className="bg-gray-800 rounded-xl p-4 text-center">
+                            <p className="text-gray-400 text-xs mb-1">Total users</p>
+                            <p className="text-2xl font-bold">{metrics.totalUsers}</p>
+                        </div>
+                        <div className="bg-gray-800 rounded-xl p-4 text-center">
+                            <p className="text-gray-400 text-xs mb-1">Free users</p>
+                            <p className="text-2xl font-bold">{metrics.freeUsers}</p>
+                        </div>
+                        <div className="bg-gray-800 rounded-xl p-4 text-center">
+                            <p className="text-gray-400 text-xs mb-1">Paid users</p>
+                            <p className="text-2xl font-bold text-green-400">{metrics.paidUsers}</p>
+                        </div>
+                    </div>
+
+                    {/* 5 key metrics table */}
+                    <div className="space-y-3">
+
+                        {/* 1. Daily active rate */}
+                        <div className="bg-gray-800 rounded-xl p-4">
+                            <div className="flex justify-between items-start mb-2">
+                                <div>
+                                    <p className="text-white text-sm font-medium">Daily active rate</p>
+                                    <p className="text-gray-500 text-xs mt-0.5">{metrics.activeToday} of {metrics.totalUsers} users active today</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className={`text-xl font-bold ${metrics.dailyActiveRate >= 60 ? 'text-green-400' : metrics.dailyActiveRate >= 40 ? 'text-amber-400' : 'text-red-400'}`}>
+                                        {metrics.dailyActiveRate}%
+                                    </p>
+                                    <p className="text-gray-600 text-xs">target: 60%+</p>
+                                </div>
+                            </div>
+                            <div className="w-full bg-gray-700 rounded-full h-1.5">
+                                <div
+                                    className={`h-1.5 rounded-full ${metrics.dailyActiveRate >= 60 ? 'bg-green-400' : metrics.dailyActiveRate >= 40 ? 'bg-amber-400' : 'bg-red-400'}`}
+                                    style={{ width: `${Math.min(metrics.dailyActiveRate, 100)}%` }}
+                                />
+                            </div>
+                        </div>
+
+                        {/* 2. Habit completion rate */}
+                        <div className="bg-gray-800 rounded-xl p-4">
+                            <div className="flex justify-between items-start mb-2">
+                                <div>
+                                    <p className="text-white text-sm font-medium">Habit completion rate</p>
+                                    <p className="text-gray-500 text-xs mt-0.5">{metrics.totalSuccessful} successful of {metrics.totalLogged} logged days</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className={`text-xl font-bold ${metrics.habitCompletionRate >= 50 ? 'text-green-400' : metrics.habitCompletionRate >= 30 ? 'text-amber-400' : 'text-red-400'}`}>
+                                        {metrics.habitCompletionRate}%
+                                    </p>
+                                    <p className="text-gray-600 text-xs">target: 50%+</p>
+                                </div>
+                            </div>
+                            <div className="w-full bg-gray-700 rounded-full h-1.5">
+                                <div
+                                    className={`h-1.5 rounded-full ${metrics.habitCompletionRate >= 50 ? 'bg-green-400' : metrics.habitCompletionRate >= 30 ? 'bg-amber-400' : 'bg-red-400'}`}
+                                    style={{ width: `${Math.min(metrics.habitCompletionRate, 100)}%` }}
+                                />
+                            </div>
+                        </div>
+
+                        {/* 3. Free to paid conversion */}
+                        <div className="bg-gray-800 rounded-xl p-4">
+                            <div className="flex justify-between items-start mb-2">
+                                <div>
+                                    <p className="text-white text-sm font-medium">Free to paid conversion</p>
+                                    <p className="text-gray-500 text-xs mt-0.5">{metrics.paidUsers} paying of {metrics.totalUsers} total users</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className={`text-xl font-bold ${metrics.conversionRate >= 20 ? 'text-green-400' : metrics.conversionRate >= 10 ? 'text-amber-400' : 'text-red-400'}`}>
+                                        {metrics.conversionRate}%
+                                    </p>
+                                    <p className="text-gray-600 text-xs">target: 20%+</p>
+                                </div>
+                            </div>
+                            <div className="w-full bg-gray-700 rounded-full h-1.5">
+                                <div
+                                    className={`h-1.5 rounded-full ${metrics.conversionRate >= 20 ? 'bg-green-400' : metrics.conversionRate >= 10 ? 'bg-amber-400' : 'bg-red-400'}`}
+                                    style={{ width: `${Math.min(metrics.conversionRate, 100)}%` }}
+                                />
+                            </div>
+                        </div>
+
+                        {/* 4. Monthly churn rate */}
+                        <div className="bg-gray-800 rounded-xl p-4">
+                            <div className="flex justify-between items-start mb-2">
+                                <div>
+                                    <p className="text-white text-sm font-medium">Monthly churn rate</p>
+                                    <p className="text-gray-500 text-xs mt-0.5">{metrics.churned || 0} users inactive for 30+ days</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className={`text-xl font-bold ${metrics.churnRate <= 5 ? 'text-green-400' : metrics.churnRate <= 10 ? 'text-amber-400' : 'text-red-400'}`}>
+                                        {metrics.churnRate}%
+                                    </p>
+                                    <p className="text-gray-600 text-xs">target: under 5%</p>
+                                </div>
+                            </div>
+                            <div className="w-full bg-gray-700 rounded-full h-1.5">
+                                <div
+                                    className={`h-1.5 rounded-full ${metrics.churnRate <= 5 ? 'bg-green-400' : metrics.churnRate <= 10 ? 'bg-amber-400' : 'bg-red-400'}`}
+                                    style={{ width: `${Math.min(metrics.churnRate, 100)}%` }}
+                                />
+                            </div>
+                        </div>
+
+                        {/* 5. NPS Score */}
+                        <div className="bg-gray-800 rounded-xl p-4">
+                            <div className="flex justify-between items-start mb-3">
+                                <div>
+                                    <p className="text-white text-sm font-medium">Net Promoter Score</p>
+                                    <p className="text-gray-500 text-xs mt-0.5">Manually entered from feedback form</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className={`text-xl font-bold ${metrics.savedNps >= 40 ? 'text-green-400' : metrics.savedNps >= 20 ? 'text-amber-400' : 'text-red-400'}`}>
+                                        {metrics.savedNps !== null ? metrics.savedNps : '—'}
+                                    </p>
+                                    <p className="text-gray-600 text-xs">target: 40+</p>
+                                </div>
+                            </div>
+                            <div className="flex gap-2">
+                                <input
+                                    type="number"
+                                    placeholder="Enter NPS score (-100 to 100)"
+                                    value={npsScore}
+                                    onChange={e => setNpsScore(e.target.value)}
+                                    min="-100"
+                                    max="100"
+                                    className="flex-1 bg-gray-700 text-white rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                                />
+                                <button
+                                    onClick={saveNps}
+                                    disabled={savingNps || !npsScore}
+                                    className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm px-4 py-2 rounded-lg transition disabled:opacity-50"
+                                >
+                                    {savingNps ? 'Saving...' : 'Save'}
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            )}
             {message && (
                 <div className="bg-indigo-900 rounded-lg p-3 mb-6">
                     <p className="text-indigo-300 text-sm">{message}</p>
