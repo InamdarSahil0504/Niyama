@@ -74,7 +74,69 @@ export default function Dashboard({ session }) {
             .select('*')
             .eq('id', userId)
             .single()
-        setProfile(profileData)
+
+        if (profileData) {
+            const todayDate = new Date()
+            const todayStr = todayDate.toISOString().split('T')[0]
+            const currentMonth = todayDate.getMonth()
+            const currentYear = todayDate.getFullYear()
+
+            // Check if it's a new month and reset if so
+            if (profileData.last_active_date) {
+                const lastActive = new Date(profileData.last_active_date)
+                const lastMonth = lastActive.getMonth()
+                const lastYear = lastActive.getFullYear()
+
+                if (currentMonth !== lastMonth || currentYear !== lastYear) {
+                    // It's a new month — reset monthly data
+                    await supabase
+                        .from('profiles')
+                        .update({
+                            monthly_points: 0,
+                            successful_days: 0,
+                            consecutive_inactive_days: 0,
+                        })
+                        .eq('id', userId)
+
+                    await supabase
+                        .from('streaks')
+                        .update({
+                            current_streak: 0,
+                            streak_bonus_unlocked: false,
+                            updated_at: new Date().toISOString(),
+                        })
+                        .eq('user_id', userId)
+
+                    await supabase
+                        .from('habits')
+                        .delete()
+                        .eq('user_id', userId)
+                } else {
+                    // Same month — check for inactivity
+                    const lastActiveDate = new Date(profileData.last_active_date)
+                    const diffTime = todayDate - lastActiveDate
+                    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+
+                    if (diffDays > 0) {
+                        const newInactiveDays = (profileData.consecutive_inactive_days || 0) + diffDays
+                        await supabase
+                            .from('profiles')
+                            .update({
+                                consecutive_inactive_days: Math.min(newInactiveDays, 99),
+                            })
+                            .eq('id', userId)
+                    }
+                }
+            }
+        }
+
+        // Refetch updated profile
+        const { data: updatedProfile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', userId)
+            .single()
+        setProfile(updatedProfile)
 
         const { data: streakData } = await supabase
             .from('streaks')
