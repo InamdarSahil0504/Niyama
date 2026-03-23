@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import Auth from './components/Auth'
 import Dashboard from './components/Dashboard'
+import Admin from './components/Admin'
 
 function App() {
   const [session, setSession] = useState(null)
@@ -24,9 +25,11 @@ function App() {
     </div>
   )
 
+  const isAdmin = window.location.pathname === '/admin'
+
   return (
     <div>
-      {!session ? <Auth /> : <Dashboard session={session} />}
+      {isAdmin ? <Admin /> : (!session ? <Auth /> : <Dashboard session={session} />)}
     </div>
   )
 }
