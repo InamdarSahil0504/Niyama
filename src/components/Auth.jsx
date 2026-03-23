@@ -59,7 +59,7 @@ export default function Auth() {
                     <p className="text-gray-400 mt-2 text-sm">Successful habits. Real rewards.</p>
                     <div className="mt-6 px-4">
                         <p className="text-white text-sm leading-relaxed">
-                            <span className="italic">Nee-ya-ma</span> — A Sanskrit word meaning <span className="italic">discipline</span> and <span className="italic">self-observance</span>. Rooted in ancient yoga philosophy, it represents the practice of showing up consistently — not for others, but for yourself.
+                            <span className="italic">Nee-yah-ma</span> — A Sanskrit word meaning <span className="italic">discipline</span> and <span className="italic">self-observance</span>. Rooted in ancient yoga philosophy, it represents the practice of showing up consistently — not for others, but for yourself.
                         </p>
                     </div>
                 </div>
