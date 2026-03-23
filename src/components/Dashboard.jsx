@@ -3,9 +3,9 @@ import { supabase } from '../supabase'
 
 const HABITS = [
     { key: 'wake_before_8', label: 'Wake before 8 AM', points: 100, penalty: 50 },
-    { key: 'sleep_before_1030', label: 'Sleep before 10:30 PM', points: 100, penalty: 50 },
-    { key: 'screen_under_2hrs', label: 'Screen time under limit', points: 100, penalty: 75 },
     { key: 'steps_over_5000', label: 'Steps 5,000 or more', points: 100, penalty: 75 },
+    { key: 'screen_under_2hrs', label: 'Screen time under 2 hrs', points: 100, penalty: 75 },
+    { key: 'sleep_before_1030', label: 'Sleep before 10:30 PM', points: 100, penalty: 50 },
 ]
 
 const TIER_CAPS = { free: 5, plus: 10, premium: 20 }
@@ -284,7 +284,7 @@ export default function Dashboard({ session }) {
                 </div>
                 <button
                     onClick={signOut}
-                    className="text-gray-500 text-sm hover:text-gray-300"
+                    className="bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-sm font-medium px-4 py-2 rounded-lg transition"
                 >
                     Sign out
                 </button>
@@ -345,8 +345,9 @@ export default function Dashboard({ session }) {
                                 <input
                                     type="checkbox"
                                     checked={habits[habit.key]}
-                                    onChange={e => setHabits({ ...habits, [habit.key]: e.target.checked })}
-                                    className="w-5 h-5 rounded accent-indigo-500"
+                                    onChange={e => !todayHabits && setHabits({ ...habits, [habit.key]: e.target.checked })}
+                                    disabled={!!todayHabits}
+                                    className="w-5 h-5 rounded accent-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                                 />
                                 <span className={habits[habit.key] ? 'text-white' : 'text-gray-400'}>
                                     {habit.label}
@@ -378,13 +379,24 @@ export default function Dashboard({ session }) {
                     </div>
                 </div>
 
-                <button
-                    onClick={saveHabits}
-                    disabled={saving}
-                    className="w-full mt-4 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-lg transition"
-                >
-                    {saving ? 'Saving...' : "Save today's habits"}
-                </button>
+                {todayHabits ? (
+                    <div className="w-full mt-4 bg-gray-800 text-gray-500 font-semibold py-3 rounded-lg text-center text-sm">
+                        ✓ Submitted for today
+                    </div>
+                ) : (
+                    <>
+                        <button
+                            onClick={saveHabits}
+                            disabled={saving}
+                            className="w-full mt-4 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-lg transition"
+                        >
+                            {saving ? 'Saving...' : "Save today's habits"}
+                        </button>
+                        <p className="text-gray-600 text-xs text-center mt-2">
+                            Note: No changes can be made once submitted
+                        </p>
+                    </>
+                )}
             </div>
 
             {/* Points Summary */}

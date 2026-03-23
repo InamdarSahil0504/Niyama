@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
 
-const ADMIN_PASSWORD = 'niyama-admin-2024'
+const ADMIN_PASSWORD = 'NiyamaHealth'
 
 export default function Admin() {
     const [authed, setAuthed] = useState(false)
