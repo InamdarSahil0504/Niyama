@@ -56,7 +56,13 @@ export default function Auth() {
                 {/* Logo */}
                 <div className="text-center mb-10">
                     <h1 className="text-4xl font-bold text-white tracking-tight">Niyama</h1>
-                    <p className="text-gray-400 mt-2 text-sm">Successful Habits. Real Rewards.</p>
+                    <p className="text-gray-400 mt-2 text-sm">Successful habits. Real rewards.</p>
+                    <div className="mt-6 px-4">
+                        <p className="text-gray-300 text-sm font-medium">नियम &bull; <span className="italic">Nee-ya-ma</span></p>
+                        <p className="text-gray-500 text-xs mt-2 leading-relaxed">
+                            A Sanskrit word meaning <span className="text-gray-400 italic">discipline</span> and <span className="text-gray-400 italic">self-observance</span>. Rooted in ancient yoga philosophy, it represents the practice of showing up consistently — not for others, but for yourself.
+                        </p>
+                    </div>
                 </div>
 
                 {/* Card */}
