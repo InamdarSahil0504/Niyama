@@ -79,8 +79,8 @@ export default function About({ profile }) {
                         <div
                             key={t.name}
                             className={`flex justify-between items-center p-3 rounded-lg ${tier === t.name.toLowerCase()
-                                    ? 'bg-indigo-950 border border-indigo-700'
-                                    : 'bg-gray-800'
+                                ? 'bg-indigo-950 border border-indigo-700'
+                                : 'bg-gray-800'
                                 }`}
                         >
                             <div>
@@ -111,7 +111,13 @@ export default function About({ profile }) {
                     <p>✓ Rewards reset at the start of each month</p>
                 </div>
             </div>
-
+            {/* Beta Notice */}
+            <div className="bg-amber-950 border border-amber-800 rounded-2xl p-6 mt-4">
+                <h3 className="text-amber-300 font-semibold mb-3">🧪 Beta testing notice</h3>
+                <p className="text-amber-200 text-sm leading-relaxed">
+                    Niyama is currently in beta testing. During this period no subscription fees will be charged and no monetary rewards will be paid out. Thank you for helping us test and improve the app!
+                </p>
+            </div>
         </div>
     )
 }

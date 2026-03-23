@@ -241,13 +241,18 @@ export default function Dashboard({ session }) {
             <div className="max-w-lg mx-auto px-4 py-8 pb-24">
 
                 {/* Header */}
-                <div className="flex justify-between items-center mb-8">
+                <div className="flex justify-between items-center mb-2">
                     <div>
                         <h1 className="text-2xl font-bold">Niyama</h1>
                         <p className="text-gray-400 text-sm">Hey, {profile?.full_name || 'there'} 👋</p>
                     </div>
                     <span className="bg-indigo-900 text-indigo-300 text-xs font-medium px-3 py-1 rounded-full">
                         {tierLabel}
+                    </span>
+                </div>
+                <div className="text-center mb-6">
+                    <span className="bg-amber-900 text-amber-300 text-xs font-medium px-3 py-1 rounded-full">
+                        Beta testing version
                     </span>
                 </div>
 
