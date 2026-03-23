@@ -106,9 +106,6 @@ export default function TierSelect({ userId, onComplete }) {
                 {saving ? 'Saving...' : selected ? 'Continue' : 'Select a plan to continue'}
             </button>
 
-            <p className="text-gray-600 text-xs text-center mt-4">
-                Subscriptions are currently managed manually. Contact us to upgrade.
-            </p>
             <div className="bg-amber-950 border border-amber-800 rounded-2xl p-6 mt-4">
                 <h3 className="text-amber-300 font-semibold mb-3">🧪 Beta testing notice</h3>
                 <p className="text-amber-200 text-sm leading-relaxed">
