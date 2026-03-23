@@ -35,7 +35,7 @@ export default function TierSelect({ userId, onComplete }) {
 
         await supabase
             .from('profiles')
-            .update({ tier: selected })
+            .update({ tier: selected, tier_chosen: true })
             .eq('id', userId)
 
         onComplete(selected)
