@@ -385,16 +385,18 @@ export default function Dashboard({ session }) {
                     </div>
                 ) : (
                     <>
+                        <div className="border-l-4 border-indigo-500 bg-gray-800 rounded-r-lg p-3 mt-4">
+                            <p className="text-slate-300 text-xs leading-relaxed">
+                                ✏️ <span className="text-white font-medium">Heads up!</span> Once saved, today's log is final. Review before submitting.
+                            </p>
+                        </div>
                         <button
                             onClick={saveHabits}
                             disabled={saving}
-                            className="w-full mt-4 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-lg transition"
+                            className="w-full mt-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-lg transition"
                         >
                             {saving ? 'Saving...' : "Save today's habits"}
                         </button>
-                        <p className="text-gray-600 text-xs text-center mt-2">
-                            Note: No changes can be made once submitted
-                        </p>
                     </>
                 )}
             </div>
