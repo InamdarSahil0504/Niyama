@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
 
 const HABITS = [
-    { key: 'wake_before_8', label: 'Wake before 8 AM', points: 100, penalty: 50 },
-    { key: 'steps_over_5000', label: 'Steps 5,000 or more', points: 100, penalty: 75 },
+    { key: 'wake_before_8', label: 'Wake before 7:30 AM', points: 100, penalty: 50 },
+    { key: 'steps_over_5000', label: '10,000+ Steps', points: 100, penalty: 75 },
     { key: 'screen_under_2hrs', label: 'Screen time under 2 hrs', points: 100, penalty: 75 },
     { key: 'sleep_before_1030', label: 'Sleep before 10:30 PM', points: 100, penalty: 50 },
 ]
