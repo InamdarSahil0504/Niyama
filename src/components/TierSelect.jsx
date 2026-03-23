@@ -50,6 +50,11 @@ export default function TierSelect({ userId, onComplete }) {
                 <h1 className="text-3xl font-bold">Niyama</h1>
                 <p className="text-gray-400 mt-2">Choose your plan to get started</p>
                 <p className="text-gray-600 text-xs mt-2">This cannot be changed later</p>
+                <div className="mt-4">
+                    <span className="bg-amber-900 text-amber-300 text-xs font-medium px-3 py-1 rounded-full">
+                        Beta testing version
+                    </span>
+                </div>
             </div>
 
             {/* Tier Cards */}
