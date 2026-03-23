@@ -42,10 +42,10 @@ export default function Settings({ profile, session, onSignOut }) {
 
     const menuItems = [
         { key: 'about', label: 'About Niyama', icon: '📖' },
-        { key: 'habits', label: 'Habit importance', icon: '💪' },
-        { key: 'legal', label: 'Legal disclaimer', icon: '📋' },
-        { key: 'feedback', label: 'Feedback form', icon: '📝' },
-        { key: 'contact', label: 'Contact us', icon: '💬' },
+        { key: 'habits', label: 'Habit Importance', icon: '💪' },
+        { key: 'legal', label: 'Legal Disclaimer', icon: '📋' },
+        { key: 'feedback', label: 'Feedback Form', icon: '📝' },
+        { key: 'contact', label: 'Contact Us', icon: '💬' },
     ]
 
     if (activePage === 'about') {
@@ -249,7 +249,7 @@ export default function Settings({ profile, session, onSignOut }) {
                 onClick={onSignOut}
                 className="w-full bg-gray-900 hover:bg-gray-800 text-red-400 font-medium py-4 rounded-2xl transition text-sm"
             >
-                Sign out
+                Sign Out
             </button>
 
         </div>

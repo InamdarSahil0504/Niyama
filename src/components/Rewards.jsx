@@ -25,7 +25,7 @@ export default function Rewards({ profile }) {
                 <p className="text-indigo-300 text-sm mt-2 capitalize">{tier} plan</p>
                 {tier === 'premium' && (
                     <p className="text-indigo-200 text-xs mt-2">
-                        🏆 Unlock up to $25 with a 25-day streak
+                        🏆 Unlock up to $25 with a Successful 25-day streak
                     </p>
                 )}
             </div>
