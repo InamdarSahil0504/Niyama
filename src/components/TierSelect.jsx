@@ -109,6 +109,12 @@ export default function TierSelect({ userId, onComplete }) {
             <p className="text-gray-600 text-xs text-center mt-4">
                 Subscriptions are currently managed manually. Contact us to upgrade.
             </p>
+            <div className="bg-amber-950 border border-amber-800 rounded-2xl p-6 mt-4">
+                <h3 className="text-amber-300 font-semibold mb-3">🧪 Beta testing notice</h3>
+                <p className="text-amber-200 text-sm leading-relaxed">
+                    Niyama is currently in beta testing. During this period no subscription fees will be charged and no monetary rewards will be paid out. Thank you for helping us test and improve the app!
+                </p>
+            </div>
 
         </div>
     )
