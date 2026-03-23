@@ -233,12 +233,12 @@ export default function Dashboard({ session }) {
         </div>
     )
 
-    if (!tierSelected && profile?.tier === 'free' && !profile?.last_active_date) {
+    if (!profile?.tier_chosen) {
         return (
             <TierSelect
                 userId={session.user.id}
                 onComplete={(tier) => {
-                    setProfile({ ...profile, tier })
+                    setProfile({ ...profile, tier, tier_chosen: true })
                     setTierSelected(true)
                 }}
             />
