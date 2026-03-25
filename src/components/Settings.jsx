@@ -65,7 +65,7 @@ export default function Settings({ profile, session, onSignOut }) {
                 <button onClick={() => setActivePage(null)} className="text-indigo-400 text-sm mb-6 flex items-center gap-1">
                     &larr; Back
                 </button>
-                <FounderStory onContinue={() => setActivePage(null)} minimal={true} />
+                <FounderStory onContinue={() => setActivePage(null)} minimal={true} showButton={false} />
             </div>
         )
     }

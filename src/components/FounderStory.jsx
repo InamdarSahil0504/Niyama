@@ -1,4 +1,4 @@
-export default function FounderStory({ onContinue, minimal = false }) {
+export default function FounderStory({ onContinue, minimal = false, showButton = true }) {
     return (
         <div className="min-h-screen bg-gray-950 text-white px-4 py-10 max-w-lg mx-auto">
 
@@ -59,12 +59,14 @@ export default function FounderStory({ onContinue, minimal = false }) {
                     <p className="text-white text-sm mt-3 font-medium">— Sahil Inamdar, Founder</p>
                 </div>
             </div>
-            <button
-                onClick={onContinue}
-                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-lg transition"
-            >
-                Continue
-            </button>
+            {showButton && (
+                <button
+                    onClick={onContinue}
+                    className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-lg transition"
+                >
+                    Continue
+                </button>
+            )}
 
         </div>
     )
