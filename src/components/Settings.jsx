@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { supabase } from '../supabase'
 import About from './About'
-
+import FounderStory from './FounderStory'
+import RulesPage from './RulesPage'
+import TierDetails from './TierDetails'
 const FEEDBACK_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScGtdoAUJ-9JPWYeqbd2QH71qPXFJcERubHiSjvKOMxLc1cxw/viewform?usp=header'
 
 export default function Settings({ profile, session, onSignOut }) {
@@ -41,13 +43,47 @@ export default function Settings({ profile, session, onSignOut }) {
     }
 
     const menuItems = [
+        { key: 'founder', label: "Founder's story", icon: '✨' },
         { key: 'about', label: 'About Niyama', icon: '📖' },
-        { key: 'habits', label: 'Habit Importance', icon: '💪' },
-        { key: 'legal', label: 'Legal Disclaimer', icon: '📋' },
-        { key: 'feedback', label: 'Feedback Form', icon: '📝' },
-        { key: 'contact', label: 'Contact Us', icon: '💬' },
+        { key: 'rules', label: 'Rules & points system', icon: '📜' },
+        { key: 'tiers', label: 'Subscription tiers', icon: '🏆' },
+        { key: 'habits', label: 'Habit importance', icon: '💪' },
+        { key: 'legal', label: 'Legal disclaimer', icon: '📋' },
+        { key: 'feedback', label: 'Feedback form', icon: '📝' },
+        { key: 'contact', label: 'Contact us', icon: '💬' },
     ]
+    if (activePage === 'founder') {
+        return (
+            <div className="min-h-screen bg-gray-950 text-white px-4 py-8 max-w-lg mx-auto pb-24">
+                <button onClick={() => setActivePage(null)} className="text-indigo-400 text-sm mb-6 flex items-center gap-1">
+                    &larr; Back
+                </button>
+                <FounderStory onContinue={() => setActivePage(null)} />
+            </div>
+        )
+    }
 
+    if (activePage === 'rules') {
+        return (
+            <div className="min-h-screen bg-gray-950 text-white px-4 py-8 max-w-lg mx-auto pb-24">
+                <button onClick={() => setActivePage(null)} className="text-indigo-400 text-sm mb-6 flex items-center gap-1">
+                    &larr; Back
+                </button>
+                <RulesPage showButton={false} />
+            </div>
+        )
+    }
+
+    if (activePage === 'tiers') {
+        return (
+            <div className="min-h-screen bg-gray-950 text-white px-4 py-8 max-w-lg mx-auto pb-24">
+                <button onClick={() => setActivePage(null)} className="text-indigo-400 text-sm mb-6 flex items-center gap-1">
+                    &larr; Back
+                </button>
+                <TierDetails showButton={false} />
+            </div>
+        )
+    }
     if (activePage === 'about') {
         return (
             <div className="min-h-screen bg-gray-950 text-white px-4 py-8 max-w-lg mx-auto pb-24">

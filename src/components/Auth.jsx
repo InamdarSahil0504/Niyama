@@ -54,6 +54,13 @@ export default function Auth() {
             <div className="w-full max-w-md">
 
                 {/* Logo */}
+                {/* Beta banner */}
+                <div className="text-center mb-4">
+                    <span className="bg-amber-900 text-amber-300 text-xs font-medium px-3 py-1 rounded-full">
+                        Beta testing version
+                    </span>
+                </div>
+
                 <div className="text-center mb-10">
                     <h1 className="text-4xl font-bold text-white tracking-tight">Niyama</h1>
                     <p className="text-gray-400 mt-2 text-sm">Successful habits. Real rewards.</p>
@@ -116,16 +123,23 @@ export default function Auth() {
                     >
                         {loading ? 'Please wait...' : isSignUp ? 'Create account' : 'Log in'}
                     </button>
-
-                    <p className="text-center text-gray-500 text-sm mt-6">
+                    {/* Sign up / Log in toggle — above disclaimer */}
+                    <p className="text-center text-gray-200 text-base mt-6">
                         {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
                         <button
                             onClick={() => { setIsSignUp(!isSignUp); setMessage('') }}
-                            className="text-indigo-400 hover:text-indigo-300"
+                            className="text-white font-semibold hover:text-indigo-300 underline"
                         >
                             {isSignUp ? 'Log in' : 'Sign up'}
                         </button>
                     </p>
+
+                    {/* Legal disclaimer */}
+                    <div className="border-t border-gray-800 mt-6 pt-4">
+                        <p className="text-gray-500 text-xs leading-relaxed text-center">
+                            Niyama is currently in beta testing. By signing up you agree that the service is provided "as is" without any warranties. No subscription fees will be charged and no monetary rewards will be paid out during the beta period. Point values, reward caps and features are subject to change without notice. Niyama reserves the right to withhold rewards in cases of suspected misuse.
+                        </p>
+                    </div>
                 </div>
 
             </div>

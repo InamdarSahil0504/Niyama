@@ -4,7 +4,9 @@ import TierSelect from './TierSelect'
 import Analytics from './Analytics'
 import Rewards from './Rewards'
 import Settings from './Settings'
-
+import FounderStory from './FounderStory'
+import RulesPage from './RulesPage'
+import TierDetails from './TierDetails'
 const HABITS = [
     { key: 'wake_before_8', label: 'Wake before 7:30 AM', points: 100, penalty: 50 },
     { key: 'steps_over_5000', label: 'Steps 10,000 or more', points: 100, penalty: 75 },
@@ -50,6 +52,7 @@ function calcReward(monthlyPoints, tier, streakBonusUnlocked, successfulDays, co
 
 export default function Dashboard({ session }) {
     const [profile, setProfile] = useState(null)
+    const [onboardingStep, setOnboardingStep] = useState(null)
     const [streak, setStreak] = useState(null)
     const [todayHabits, setTodayHabits] = useState(null)
     const [loading, setLoading] = useState(true)
@@ -118,7 +121,10 @@ export default function Dashboard({ session }) {
         const { data: updatedProfile } = await supabase
             .from('profiles').select('*').eq('id', userId).single()
         setProfile(updatedProfile)
-
+        // Check if onboarding is needed
+        if (updatedProfile && !updatedProfile.onboarding_complete) {
+            setOnboardingStep('founder-story')
+        }
         const { data: streakData } = await supabase
             .from('streaks').select('*').eq('user_id', userId).single()
         setStreak(streakData)
@@ -232,6 +238,29 @@ export default function Dashboard({ session }) {
             <p className="text-white">Loading...</p>
         </div>
     )
+
+    // Onboarding flow for new users
+    if (onboardingStep === 'founder-story') {
+        return <FounderStory onContinue={() => setOnboardingStep('rules')} />
+    }
+
+    if (onboardingStep === 'rules') {
+        return (
+            <RulesPage onContinue={async () => {
+                await supabase.from('profiles').update({ rules_acknowledged: true }).eq('id', session.user.id)
+                setOnboardingStep('tier-details')
+            }} />
+        )
+    }
+
+    if (onboardingStep === 'tier-details') {
+        return (
+            <TierDetails onContinue={async () => {
+                await supabase.from('profiles').update({ onboarding_complete: true }).eq('id', session.user.id)
+                setOnboardingStep(null)
+            }} />
+        )
+    }
 
     if (!profile?.tier_chosen) {
         return (

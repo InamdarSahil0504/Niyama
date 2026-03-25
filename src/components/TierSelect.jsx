@@ -45,6 +45,13 @@ export default function TierSelect({ userId, onComplete }) {
     return (
         <div className="min-h-screen bg-gray-950 text-white px-4 py-12 max-w-lg mx-auto">
 
+            {/* Beta banner */}
+            <div className="text-center mb-4">
+                <span className="bg-amber-900 text-amber-300 text-xs font-medium px-3 py-1 rounded-full">
+                    Beta testing version
+                </span>
+            </div>
+
             {/* Header */}
             <div className="text-center mb-10">
                 <h1 className="text-3xl font-bold">Niyama</h1>
