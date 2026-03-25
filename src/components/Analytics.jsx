@@ -34,24 +34,24 @@ export default function Analytics({ profile, streak }) {
                 <h3 className="text-gray-400 text-sm font-medium mb-4">This month</h3>
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <p className="text-gray-500 text-xs">Monthly points</p>
-                        <p className="text-2xl font-bold mt-1">{monthlyPoints}</p>
-                        <p className="text-gray-600 text-xs">max 22,500</p>
+                        <p className="text-gray-400 text-sm">Monthly points</p>
+                        <p className="text-3xl font-bold mt-1 text-gray-100">{monthlyPoints}</p>
+                        <p className="text-gray-500 text-xs">max 22,500</p>
                     </div>
                     <div>
-                        <p className="text-gray-500 text-xs">Points value</p>
-                        <p className="text-2xl font-bold mt-1 text-green-400">${pointsValue}</p>
-                        <p className="text-gray-600 text-xs">before cap</p>
+                        <p className="text-gray-400 text-sm">Points value</p>
+                        <p className="text-3xl font-bold mt-1 text-gray-100 text-green-400">${pointsValue}</p>
+                        <p className="text-gray-500 text-xs">before cap</p>
                     </div>
                     <div>
-                        <p className="text-gray-500 text-xs">Successful days</p>
-                        <p className="text-2xl font-bold mt-1">{successfulDays}</p>
-                        <p className="text-gray-600 text-xs">this month</p>
+                        <p className="text-gray-400 text-sm">Successful days</p>
+                        <p className="text-3xl font-bold mt-1 text-gray-100">{successfulDays}</p>
+                        <p className="text-gray-500 text-xs">this month</p>
                     </div>
                     <div>
-                        <p className="text-gray-500 text-xs">Monthly completion</p>
-                        <p className="text-2xl font-bold mt-1">{monthlyCompletionRate}%</p>
-                        <p className="text-gray-600 text-xs">of 30 days</p>
+                        <p className="text-gray-400 text-sm">Monthly completion</p>
+                        <p className="text-3xl font-bold mt-1 text-gray-100">{monthlyCompletionRate}%</p>
+                        <p className="text-gray-500 text-xs">of 30 days</p>
                     </div>
                 </div>
             </div>
@@ -61,24 +61,24 @@ export default function Analytics({ profile, streak }) {
                 <h3 className="text-gray-400 text-sm font-medium mb-4">All time</h3>
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <p className="text-gray-500 text-xs">Overall successful days</p>
-                        <p className="text-2xl font-bold mt-1">{overallSuccessfulDays}</p>
-                        <p className="text-gray-600 text-xs">since joining</p>
+                        <p className="text-gray-400 text-sm">Overall successful days</p>
+                        <p className="text-3xl font-bold mt-1 text-gray-100">{overallSuccessfulDays}</p>
+                        <p className="text-gray-500 text-xs">since joining</p>
                     </div>
                     <div>
-                        <p className="text-gray-500 text-xs">Total days logged</p>
-                        <p className="text-2xl font-bold mt-1">{totalDaysLogged}</p>
-                        <p className="text-gray-600 text-xs">since joining</p>
+                        <p className="text-gray-400 text-sm">Total days logged</p>
+                        <p className="text-3xl font-bold mt-1 text-gray-100">{totalDaysLogged}</p>
+                        <p className="text-gray-500 text-xs">since joining</p>
                     </div>
                     <div>
-                        <p className="text-gray-500 text-xs">Overall success rate</p>
-                        <p className="text-2xl font-bold mt-1">{completionRate}%</p>
-                        <p className="text-gray-600 text-xs">of days logged</p>
+                        <p className="text-gray-400 text-sm">Overall success rate</p>
+                        <p className="text-3xl font-bold mt-1 text-gray-100">{completionRate}%</p>
+                        <p className="text-gray-500 text-xs">of days logged</p>
                     </div>
                     <div>
-                        <p className="text-gray-500 text-xs">Total habits completed</p>
-                        <p className="text-2xl font-bold mt-1">{totalHabitsCompleted}</p>
-                        <p className="text-gray-600 text-xs">all time</p>
+                        <p className="text-gray-400 text-sm">Total habits completed</p>
+                        <p className="text-3xl font-bold mt-1 text-gray-100">{totalHabitsCompleted}</p>
+                        <p className="text-gray-500 text-xs">all time</p>
                     </div>
                 </div>
             </div>
@@ -88,14 +88,14 @@ export default function Analytics({ profile, streak }) {
                 <h3 className="text-gray-400 text-sm font-medium mb-4">Daily averages</h3>
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <p className="text-gray-500 text-xs">Avg habits per day (overall)</p>
-                        <p className="text-2xl font-bold mt-1">{avgHabitsPerDayOverall}</p>
-                        <p className="text-gray-600 text-xs">out of 4</p>
+                        <p className="text-gray-400 text-sm">Avg habits per day (overall)</p>
+                        <p className="text-3xl font-bold mt-1 text-gray-100">{avgHabitsPerDayOverall}</p>
+                        <p className="text-gray-500 text-xs">out of 4</p>
                     </div>
                     <div>
-                        <p className="text-gray-500 text-xs">Avg habits per day (month)</p>
-                        <p className="text-2xl font-bold mt-1">{avgHabitsPerDayMonthly}</p>
-                        <p className="text-gray-600 text-xs">out of 4</p>
+                        <p className="text-gray-400 text-sm">Avg habits per day (month)</p>
+                        <p className="text-3xl font-bold mt-1 text-gray-100">{avgHabitsPerDayMonthly}</p>
+                        <p className="text-gray-500 text-xs">out of 4</p>
                     </div>
                 </div>
 
@@ -119,12 +119,12 @@ export default function Analytics({ profile, streak }) {
                 <h3 className="text-gray-400 text-sm font-medium mb-4">Streak stats</h3>
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <p className="text-gray-500 text-xs">Current streak</p>
-                        <p className="text-2xl font-bold mt-1">{currentStreak} days</p>
+                        <p className="text-gray-400 text-sm">Current streak</p>
+                        <p className="text-3xl font-bold mt-1 text-gray-100">{currentStreak} days</p>
                     </div>
                     <div>
-                        <p className="text-gray-500 text-xs">Longest streak</p>
-                        <p className="text-2xl font-bold mt-1">{longestStreak} days</p>
+                        <p className="text-gray-400 text-sm">Longest streak</p>
+                        <p className="text-3xl font-bold mt-1 text-gray-100">{longestStreak} days</p>
                     </div>
                 </div>
 
