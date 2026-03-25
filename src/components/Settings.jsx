@@ -442,7 +442,7 @@ export default function Settings({ profile, session, onSignOut }) {
                     >
                         <div className="flex items-center gap-3">
                             <span style={{ fontSize: '16px' }}>{item.icon}</span>
-                            <span className="text-sm">{item.label}</span>
+                            <span className="text-base">{item.label}</span>
                         </div>
                         <span className="text-gray-600">→</span>
                     </button>
