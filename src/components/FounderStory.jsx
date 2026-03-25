@@ -22,37 +22,43 @@ export default function FounderStory({ onContinue, minimal = false }) {
 
             {/* Story */}
             <div className="bg-gray-900 rounded-2xl p-6 mb-6 space-y-4">
-                <p className="text-gray-300 text-sm leading-relaxed italic">
-                    I'm a biotech scientist with a PhD in Chemical Engineering specialising in Immunotherapy. For the past five years I've been working on therapies for some of the most devastating diseases humans face — cancer, rheumatoid arthritis, sepsis, traumatic brain injury and most recently neurodegenerative diseases like Alzheimer's and Parkinson's.
+
+                <p className="text-white text-sm leading-relaxed italic">
+                    Hi, my name is Sahil Inamdar and I am the founder of Niyama.
                 </p>
-                <p className="text-gray-300 text-sm leading-relaxed italic">
+                <p className="text-white text-sm leading-relaxed italic">
+                    Five years ago, as a young scientist with a PhD focusing on cancer immunotherapy, I embarked on my journey in the biotech industry with a primary purpose of developing therapies for patients suffering from various diseases. I worked on devastating diseases humans face like Sepsis, Traumatic Brain Injury, Rheumatoid Arthritis and cancers (currently being tested in clinical trials). Most recently, I have been trying to develop therapies for neurodegenerative diseases like Alzheimer's and Parkinson's. Every day in the lab I see what these diseases do to people — the loss of independence, of memory, and importantly the inability to recognise the faces they love.
+                </p>
+                <p className="text-white text-sm leading-relaxed italic">
                     But as I spent years searching for cures, a question kept nagging at me: what if we never had to get here in the first place?
                 </p>
-                <p className="text-gray-300 text-sm leading-relaxed italic">
-                    The science is clear. People who maintain consistent daily habits — regular sleep, physical activity, limited screen time — have dramatically lower risk of developing the diseases I work on. The data is not subtle. It's overwhelming.
+                <p className="text-white text-sm leading-relaxed italic">
+                    See, I am a scientist by training and by passion. I spent months researching, combing through scientific journals and clinical studies looking for answers. What I found was both simple and profound. People who maintain consistent daily habits — regular sleep, physical activity, limited screen time — have dramatically lower risk of developing the diseases I work on every day.
                 </p>
-                <p className="text-gray-300 text-sm leading-relaxed italic">
-                    So I asked myself: why aren't more people doing this? The answer isn't ignorance. Everyone knows exercise is good for them. The answer is motivation. Specifically, the absence of any real external incentive to stay consistent when life gets hard.
+                <p className="text-white text-sm leading-relaxed italic">
+                    Yes! It is that simple. The data is not subtle. It is overwhelming. And yet most people are not doing it.
                 </p>
-                <p className="text-gray-300 text-sm leading-relaxed italic">
+                <p className="text-white text-sm leading-relaxed italic">
+                    So I asked myself: why? The answer isn't ignorance. Everyone knows exercise is good for them. The answer is motivation. Specifically, the absence of any real external incentive to stay consistent when life gets hard.
+                </p>
+                <p className="text-white text-sm leading-relaxed italic">
                     Every habit app I found relied entirely on willpower. Streaks, badges, reminders. None of them changed the underlying economics of behavior. Skipping a habit costs nothing. So people skip.
                 </p>
-                <p className="text-gray-300 text-sm leading-relaxed italic">
+                <p className="text-white text-sm leading-relaxed italic">
                     That's why I built Niyama. A system where discipline is measured, consistency is rewarded, and the rewards are real enough to actually change behavior. Not as a gimmick — but as a scientifically grounded intervention based on the same reinforcement principles we use in clinical research.
                 </p>
-                <p className="text-gray-300 text-sm leading-relaxed italic">
+                <p className="text-white text-sm leading-relaxed italic">
                     The goal of Niyama is simple: Living healthy every single day — not for others, but for yourself.
                 </p>
 
                 {/* Thank you note */}
                 <div className="border-t border-gray-700 pt-4 mt-4">
-                    <p className="text-gray-400 text-sm leading-relaxed">
+                    <p className="text-white text-sm leading-relaxed">
                         Thank you for being one of our first beta testers. Your feedback and experience over the coming weeks will directly shape the future of Niyama. I am grateful you are here.
                     </p>
-                    <p className="text-gray-500 text-sm mt-3 font-medium">— Sahil Inamdar, CEO & Founder, Niyama</p>
+                    <p className="text-white text-sm mt-3 font-medium">— Sahil Inamdar, Founder</p>
                 </div>
             </div>
-
             <button
                 onClick={onContinue}
                 className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-lg transition"
