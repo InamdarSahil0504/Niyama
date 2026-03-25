@@ -180,10 +180,7 @@ export default function Admin() {
             })
             .eq('user_id', userId)
 
-        await supabase
-            .from('habits')
-            .delete()
-            .eq('user_id', userId)
+        // Habits are never deleted — only monthly counters are reset
 
         setMessage('Monthly data reset for user')
         fetchData()

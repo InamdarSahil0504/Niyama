@@ -105,7 +105,8 @@ export default function Dashboard({ session }) {
                         updated_at: new Date().toISOString(),
                     }).eq('user_id', userId)
 
-                    await supabase.from('habits').delete().eq('user_id', userId)
+                    // Habits are never deleted — data is kept permanently
+                    // Only reset monthly counters
                 } else {
                     const lastActiveDate = new Date(profileData.last_active_date)
                     const diffDays = Math.floor((todayDate - lastActiveDate) / (1000 * 60 * 60 * 24))
@@ -191,12 +192,24 @@ export default function Dashboard({ session }) {
             })
         }
 
+        const currentMonthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+            .toISOString().split('T')[0]
+
         const { data: allHabits } = await supabase
-            .from('habits').select('points_earned').eq('user_id', userId)
+            .from('habits')
+            .select('points_earned')
+            .eq('user_id', userId)
+            .gte('date', currentMonthStart)
+
         const monthlyPoints = allHabits.reduce((sum, h) => sum + h.points_earned, 0)
 
         const { data: successfulHabits } = await supabase
-            .from('habits').select('day_successful').eq('user_id', userId).eq('day_successful', true)
+            .from('habits')
+            .select('day_successful')
+            .eq('user_id', userId)
+            .eq('day_successful', true)
+            .gte('date', currentMonthStart)
+
         const successfulDays = successfulHabits.length
 
         let newStreak = streak.current_streak
@@ -218,11 +231,30 @@ export default function Dashboard({ session }) {
             updated_at: new Date().toISOString(),
         }).eq('user_id', userId)
 
+        // Calculate overall all-time stats
+        const { data: allTimeHabits } = await supabase
+            .from('habits')
+            .select('day_successful, wake_before_8, steps_over_5000, screen_under_2hrs, sleep_before_1030')
+            .eq('user_id', userId)
+
+        const overallSuccessfulDays = allTimeHabits.filter(h => h.day_successful).length
+        const totalDaysLogged = allTimeHabits.length
+        const totalHabitsCompleted = allTimeHabits.reduce((sum, h) => {
+            return sum +
+                (h.wake_before_8 ? 1 : 0) +
+                (h.steps_over_5000 ? 1 : 0) +
+                (h.screen_under_2hrs ? 1 : 0) +
+                (h.sleep_before_1030 ? 1 : 0)
+        }, 0)
+
         await supabase.from('profiles').update({
             monthly_points: monthlyPoints,
             successful_days: successfulDays,
             consecutive_inactive_days: 0,
             last_active_date: today,
+            overall_successful_days: overallSuccessfulDays,
+            total_habits_completed: totalHabitsCompleted,
+            total_days_logged: totalDaysLogged,
         }).eq('id', userId)
 
         await fetchData()
@@ -322,10 +354,12 @@ export default function Dashboard({ session }) {
                                     <p className="text-indigo-300 text-sm">Current streak</p>
                                     <p className="text-3xl font-bold">{streak?.current_streak || 0} days</p>
                                 </div>
-                                <div className="text-right">
-                                    <p className="text-indigo-300 text-sm">25 day goal</p>
-                                    <p className="text-indigo-400 text-sm mt-1">{streak?.current_streak || 0}/25</p>
-                                </div>
+                                {profile?.tier === 'premium' && (
+                                    <div className="text-right">
+                                        <p className="text-indigo-300 text-sm">25 day goal</p>
+                                        <p className="text-indigo-400 text-sm mt-1">{streak?.current_streak || 0}/25</p>
+                                    </div>
+                                )}
                             </div>
                             <div className="w-full bg-indigo-800 rounded-full h-2">
                                 <div
@@ -347,8 +381,15 @@ export default function Dashboard({ session }) {
                                     style={{ width: `${Math.min(successfulDays / 7 * 100, 100)}%` }}
                                 />
                             </div>
-                            {isEligible && (
-                                <p className="text-green-400 text-xs mt-2">✓ Eligible for rewards this month</p>
+                            {isEligible ? (
+                                <div className="mt-2">
+                                    <p className="text-green-400 text-xs">✓ Eligible for rewards this month</p>
+                                    <p className="text-green-400 text-xs mt-1">🎉 Congratulations! You have earned your reward this month. Keep going!</p>
+                                </div>
+                            ) : (
+                                <p className="text-gray-500 text-xs mt-2">
+                                    {7 - successfulDays} more successful {7 - successfulDays === 1 ? 'day' : 'days'} needed to qualify
+                                </p>
                             )}
                         </div>
 
@@ -419,6 +460,13 @@ export default function Dashboard({ session }) {
                                             {saving === 'submit' ? 'Submitting...' : "Submit today's habits"}
                                         </button>
                                     </div>
+                                    {!Object.values(habits).some(v => v === true) && (
+                                        <div className="bg-gray-800 rounded-lg p-3 mt-4 text-center">
+                                            <p className="text-gray-400 text-xs leading-relaxed">
+                                                Even if you have not completed any habits today, please submit your results so we can track your progress accurately.
+                                            </p>
+                                        </div>
+                                    )}
                                     <div className="border-l-4 border-indigo-500 bg-gray-800 rounded-r-lg p-3 mt-3">
                                         <p className="text-slate-300 text-xs leading-relaxed">
                                             ✏️ <span className="text-white font-medium">Heads up!</span> Once submitted, today's log is final. Review before submitting.
@@ -439,6 +487,16 @@ export default function Dashboard({ session }) {
                                 <p className="text-gray-400 text-sm">Successful days</p>
                                 <p className="text-2xl font-bold mt-1">{successfulDays}</p>
                                 <p className="text-gray-600 text-xs mt-1">this month</p>
+                            </div>
+                            <div className="bg-gray-900 rounded-2xl p-4">
+                                <p className="text-gray-400 text-sm">Overall successful days</p>
+                                <p className="text-2xl font-bold mt-1">{profile?.overall_successful_days || 0}</p>
+                                <p className="text-gray-600 text-xs mt-1">all time</p>
+                            </div>
+                            <div className="bg-gray-900 rounded-2xl p-4">
+                                <p className="text-gray-400 text-sm">Days logged</p>
+                                <p className="text-2xl font-bold mt-1">{profile?.total_days_logged || 0}</p>
+                                <p className="text-gray-600 text-xs mt-1">all time</p>
                             </div>
                         </div>
 
