@@ -54,20 +54,19 @@ export default function Auth() {
             <div className="w-full max-w-md">
 
                 {/* Logo */}
-                {/* Beta banner */}
-                <div className="text-center mb-4">
-                    <span className="bg-amber-900 text-amber-300 text-xs font-medium px-3 py-1 rounded-full">
-                        Beta testing version
-                    </span>
-                </div>
-
                 <div className="text-center mb-10">
                     <h1 className="text-4xl font-bold text-white tracking-tight">Niyama</h1>
                     <p className="text-gray-400 mt-2 text-sm">Successful habits. Real rewards.</p>
                     <div className="mt-6 px-4">
-                        <p className="text-white text-sm leading-relaxed">
-                            <span className="italic">Nee-yah-ma</span> — A Sanskrit word meaning <span className="italic">discipline</span> and <span className="italic">self-observance</span>. Rooted in ancient yoga philosophy, it represents the practice of showing up consistently — not for others, but for yourself.
+                        <p className="text-gray-300 text-sm font-medium"><span className="italic">Nee-yah-ma</span></p>
+                        <p className="text-white text-xs mt-2 leading-relaxed">
+                            A Sanskrit word meaning <span className="text-white italic">discipline</span> and <span className="text-white italic">self-observance</span>. Rooted in ancient yoga philosophy, it represents the practice of showing up consistently — not for others, but for yourself.
                         </p>
+                    </div>
+                    <div className="mt-4">
+                        <span className="bg-amber-900 text-amber-300 text-xs font-medium px-3 py-1 rounded-full">
+                            Beta testing version
+                        </span>
                     </div>
                 </div>
 
