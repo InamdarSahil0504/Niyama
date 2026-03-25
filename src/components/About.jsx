@@ -4,8 +4,6 @@ export default function About({ profile }) {
     return (
         <div className="min-h-screen bg-gray-950 text-white px-4 py-8 max-w-lg mx-auto pb-24">
 
-            <h2 className="text-xl font-bold mb-6">About Niyama</h2>
-
             {/* What is Niyama */}
             <div className="bg-gray-900 rounded-2xl p-6 mb-4">
                 <h3 className="text-white font-semibold mb-3">What is Niyama?</h3>

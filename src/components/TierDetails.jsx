@@ -2,15 +2,16 @@ export default function TierDetails({ onContinue, showButton = true }) {
     return (
         <div className="min-h-screen bg-gray-950 text-white px-4 py-10 max-w-lg mx-auto pb-24">
 
-            {/* Beta banner */}
-            <div className="text-center mb-6">
-                <span className="bg-amber-900 text-amber-300 text-xs font-medium px-3 py-1 rounded-full">
-                    Beta testing version
-                </span>
-            </div>
+            {/* Beta banner — only shown during onboarding */}
+            {showButton && (
+                <div className="text-center mb-6">
+                    <span className="bg-amber-900 text-amber-300 text-xs font-medium px-3 py-1 rounded-full">
+                        Beta testing version
+                    </span>
+                </div>
+            )}
 
-            <h1 className="text-2xl font-bold mb-2">Subscription tiers</h1>
-            <p className="text-gray-400 text-sm mb-6">Choose the plan that works best for you</p>
+            <h1 className="text-2xl font-bold mb-6">Subscription tiers</h1>
 
             {/* Tier cards */}
             <div className="space-y-4 mb-6">

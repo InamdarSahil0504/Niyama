@@ -41,7 +41,14 @@ export default function Settings({ profile, session, onSignOut }) {
             setSending(false)
         }, 800)
     }
-
+    function getMemberDays() {
+        if (!profile?.created_at) return null
+        const created = new Date(profile.created_at)
+        const today = new Date()
+        const diffTime = today - created
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+        return diffDays
+    }
     const menuItems = [
         { key: 'founder', label: "Founder's story", icon: '✨' },
         { key: 'about', label: 'About Niyama', icon: '📖' },
@@ -58,7 +65,7 @@ export default function Settings({ profile, session, onSignOut }) {
                 <button onClick={() => setActivePage(null)} className="text-indigo-400 text-sm mb-6 flex items-center gap-1">
                     &larr; Back
                 </button>
-                <FounderStory onContinue={() => setActivePage(null)} />
+                <FounderStory onContinue={() => setActivePage(null)} minimal={true} />
             </div>
         )
     }
@@ -69,7 +76,97 @@ export default function Settings({ profile, session, onSignOut }) {
                 <button onClick={() => setActivePage(null)} className="text-indigo-400 text-sm mb-6 flex items-center gap-1">
                     &larr; Back
                 </button>
-                <RulesPage showButton={false} />
+                <h2 className="text-xl font-bold mb-6">How Niyama works</h2>
+
+                <div className="bg-gray-900 rounded-2xl p-6 mb-4">
+                    <h3 className="text-white font-semibold mb-4">Your 4 daily habits</h3>
+                    <div className="space-y-3 text-sm">
+                        {[
+                            { habit: 'Wake before 7:30 AM', complete: '+100 pts', incomplete: '-50 pts' },
+                            { habit: 'Steps 10,000 or more', complete: '+100 pts', incomplete: '-75 pts' },
+                            { habit: 'Screen time under 2 hrs', complete: '+100 pts', incomplete: '-75 pts' },
+                            { habit: 'Sleep by 10:30 PM', complete: '+100 pts', incomplete: '-50 pts' },
+                        ].map(item => (
+                            <div key={item.habit} className="flex justify-between items-center">
+                                <span className="text-gray-400">{item.habit}</span>
+                                <div className="flex gap-2 text-xs">
+                                    <span className="text-green-400">{item.complete}</span>
+                                    <span className="text-gray-600">/</span>
+                                    <span className="text-red-400">{item.incomplete}</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="bg-gray-900 rounded-2xl p-6 mb-4">
+                    <h3 className="text-white font-semibold mb-4">Points system</h3>
+                    <div className="space-y-3 text-sm">
+                        <div className="flex justify-between">
+                            <span className="text-gray-400">Base points per day</span>
+                            <span className="font-medium">250 pts</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-gray-400">Per habit completed</span>
+                            <span className="text-green-400 font-medium">+100 pts</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-gray-400">All 4 habits bonus</span>
+                            <span className="text-green-400 font-medium">+100 pts</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-gray-400">Perfect day total</span>
+                            <span className="font-medium">750 pts</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-gray-400">Worst day total</span>
+                            <span className="font-medium">0 pts</span>
+                        </div>
+                        <div className="border-t border-gray-800 pt-3 flex justify-between">
+                            <span className="text-gray-400">Points to money</span>
+                            <span className="text-green-400 font-medium">1,000 pts = $1.00</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-gray-400">Maximum monthly</span>
+                            <span className="font-medium">22,500 pts = $22.50</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-gray-900 rounded-2xl p-6 mb-4">
+                    <h3 className="text-white font-semibold mb-4">Reward eligibility rules</h3>
+                    <div className="space-y-3 text-sm text-gray-400">
+                        <div className="flex gap-3">
+                            <span className="text-indigo-400 font-bold">1.</span>
+                            <p>Minimum of <span className="text-white font-medium">7 successful days</span> per month to qualify. A successful day means all 4 habits completed.</p>
+                        </div>
+                        <div className="flex gap-3">
+                            <span className="text-indigo-400 font-bold">2.</span>
+                            <p>No more than <span className="text-white font-medium">5 consecutive inactive days</span>. Exceeding this disqualifies you from rewards that month.</p>
+                        </div>
+                        <div className="flex gap-3">
+                            <span className="text-indigo-400 font-bold">3.</span>
+                            <p>Reward = <span className="text-white font-medium">min(points value, tier cap)</span>. Points value = monthly points divided by 1,000.</p>
+                        </div>
+                        <div className="flex gap-3">
+                            <span className="text-indigo-400 font-bold">4.</span>
+                            <p>Rewards reset at the start of every month. Points do not carry over.</p>
+                        </div>
+                        <div className="flex gap-3">
+                            <span className="text-indigo-400 font-bold">5.</span>
+                            <p>Premium users with a <span className="text-white font-medium">25-day continuous streak</span> receive a flat <span className="text-white font-medium">$25 payout</span>.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-red-950 border border-red-800 rounded-2xl p-6">
+                    <h3 className="text-red-300 font-semibold mb-3">Honor system and fair play</h3>
+                    <div className="space-y-2 text-sm text-red-200">
+                        <p>Niyama operates on an <span className="font-medium text-white">honor system</span>. All habit logging is self-reported and trust-based.</p>
+                        <p>Users found <span className="font-medium text-white">fraudulently reporting habits</span> will be <span className="font-medium text-white">permanently disqualified</span> from rewards and may have their account suspended.</p>
+                        <p>Niyama reserves the right to <span className="font-medium text-white">audit user behaviour</span> and revoke eligibility at any time.</p>
+                    </div>
+                </div>
             </div>
         )
     }
@@ -80,7 +177,72 @@ export default function Settings({ profile, session, onSignOut }) {
                 <button onClick={() => setActivePage(null)} className="text-indigo-400 text-sm mb-6 flex items-center gap-1">
                     &larr; Back
                 </button>
-                <TierDetails showButton={false} />
+                <h2 className="text-xl font-bold mb-6">Subscription tiers</h2>
+
+                <div className="space-y-4 mb-6">
+                    <div className="bg-gray-900 rounded-2xl p-6">
+                        <div className="flex justify-between items-start mb-3">
+                            <div>
+                                <h3 className="text-lg font-semibold">Free</h3>
+                                <p className="text-gray-500 text-sm">Get started with habit tracking</p>
+                            </div>
+                            <span className="text-2xl font-bold">$0</span>
+                        </div>
+                        <div className="space-y-2 text-sm">
+                            <div className="flex justify-between"><span className="text-gray-400">Monthly reward cap</span><span className="text-green-400 font-medium">$5.00</span></div>
+                            <div className="flex justify-between"><span className="text-gray-400">Habit tracking</span><span className="text-white">All 4 habits</span></div>
+                            <div className="flex justify-between"><span className="text-gray-400">Streak tracking</span><span className="text-white">Included</span></div>
+                            <div className="flex justify-between"><span className="text-gray-400">25-day streak bonus</span><span className="text-gray-600">Not available</span></div>
+                        </div>
+                    </div>
+
+                    <div className="bg-gray-900 rounded-2xl p-6 border border-indigo-700">
+                        <div className="bg-indigo-900 text-indigo-300 text-xs px-2 py-0.5 rounded-full inline-block mb-3">Popular</div>
+                        <div className="flex justify-between items-start mb-3">
+                            <div>
+                                <h3 className="text-lg font-semibold">Plus</h3>
+                                <p className="text-gray-500 text-sm">Double your reward potential</p>
+                            </div>
+                            <div className="text-right">
+                                <span className="text-2xl font-bold">$4.99</span>
+                                <p className="text-gray-500 text-xs">/month</p>
+                            </div>
+                        </div>
+                        <div className="space-y-2 text-sm">
+                            <div className="flex justify-between"><span className="text-gray-400">Monthly reward cap</span><span className="text-green-400 font-medium">$10.00</span></div>
+                            <div className="flex justify-between"><span className="text-gray-400">Habit tracking</span><span className="text-white">All 4 habits</span></div>
+                            <div className="flex justify-between"><span className="text-gray-400">Streak tracking</span><span className="text-white">Included</span></div>
+                            <div className="flex justify-between"><span className="text-gray-400">25-day streak bonus</span><span className="text-gray-600">Not available</span></div>
+                        </div>
+                    </div>
+
+                    <div className="bg-gray-900 rounded-2xl p-6 border border-amber-700">
+                        <div className="bg-amber-900 text-amber-300 text-xs px-2 py-0.5 rounded-full inline-block mb-3">Best value</div>
+                        <div className="flex justify-between items-start mb-3">
+                            <div>
+                                <h3 className="text-lg font-semibold">Premium</h3>
+                                <p className="text-gray-500 text-sm">Unlock the streak bonus</p>
+                            </div>
+                            <div className="text-right">
+                                <span className="text-2xl font-bold">$14.99</span>
+                                <p className="text-gray-500 text-xs">/month</p>
+                            </div>
+                        </div>
+                        <div className="space-y-2 text-sm">
+                            <div className="flex justify-between"><span className="text-gray-400">Monthly reward cap</span><span className="text-green-400 font-medium">$20.00</span></div>
+                            <div className="flex justify-between"><span className="text-gray-400">Habit tracking</span><span className="text-white">All 4 habits</span></div>
+                            <div className="flex justify-between"><span className="text-gray-400">Streak tracking</span><span className="text-white">Included</span></div>
+                            <div className="flex justify-between"><span className="text-gray-400">25-day streak bonus</span><span className="text-green-400 font-medium">Up to $25 payout</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-amber-950 border border-amber-800 rounded-2xl p-5">
+                    <h3 className="text-amber-300 font-semibold mb-2">Beta testing notice</h3>
+                    <div className="space-y-2 text-sm text-amber-200">
+                        <p>During the beta testing period no subscription fees will be charged and no monetary rewards will be paid out. All tiers are fully functional so you can experience the complete Niyama system.</p>
+                    </div>
+                </div>
             </div>
         )
     }
@@ -255,9 +417,16 @@ export default function Settings({ profile, session, onSignOut }) {
                     <div>
                         <p className="font-semibold">{profile?.full_name || 'User'}</p>
                         <p className="text-gray-400 text-sm">{session?.user?.email}</p>
-                        <span className="bg-indigo-900 text-indigo-300 text-xs px-2 py-0.5 rounded-full mt-1 inline-block capitalize">
-                            {profile?.tier || 'free'} plan
-                        </span>
+                        <div className="flex gap-2 mt-1 flex-wrap">
+                            <span className="bg-indigo-900 text-indigo-300 text-xs px-2 py-0.5 rounded-full capitalize">
+                                {profile?.tier || 'free'} plan
+                            </span>
+                            {getMemberDays() !== null && (
+                                <span className="bg-gray-800 text-gray-400 text-xs px-2 py-0.5 rounded-full">
+                                    Member for {getMemberDays() === 0 ? 'less than a day' : `${getMemberDays()} ${getMemberDays() === 1 ? 'day' : 'days'}`}
+                                </span>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
