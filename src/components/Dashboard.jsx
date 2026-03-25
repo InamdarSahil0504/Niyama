@@ -86,6 +86,58 @@ export default function Dashboard({ session }) {
             const todayDate = new Date()
             const currentMonth = todayDate.getMonth()
             const currentYear = todayDate.getFullYear()
+            // Auto-submit yesterday's habits if not submitted
+            const yesterday = new Date()
+            yesterday.setDate(yesterday.getDate() - 1)
+            const yesterdayStr = yesterday.toISOString().split('T')[0]
+
+            const { data: yesterdayHabits } = await supabase
+                .from('habits')
+                .select('*')
+                .eq('user_id', userId)
+                .eq('date', yesterdayStr)
+                .single()
+
+            if (yesterdayHabits && !yesterdayHabits.submitted) {
+                // Auto-submit with whatever was saved
+                const daySuccessful = yesterdayHabits.wake_before_8 &&
+                    yesterdayHabits.steps_over_5000 &&
+                    yesterdayHabits.screen_under_2hrs &&
+                    yesterdayHabits.sleep_before_1030
+
+                let points = 250
+                if (yesterdayHabits.wake_before_8) points += 100; else points -= 50
+                if (yesterdayHabits.steps_over_5000) points += 100; else points -= 75
+                if (yesterdayHabits.screen_under_2hrs) points += 100; else points -= 75
+                if (yesterdayHabits.sleep_before_1030) points += 100; else points -= 50
+                if (daySuccessful) points += 100
+                points = Math.max(points, 0)
+
+                await supabase
+                    .from('habits')
+                    .update({
+                        submitted: true,
+                        day_successful: daySuccessful,
+                        points_earned: points,
+                    })
+                    .eq('id', yesterdayHabits.id)
+
+            } else if (!yesterdayHabits) {
+                // No record at all for yesterday — create one with all habits false
+                await supabase
+                    .from('habits')
+                    .insert({
+                        user_id: userId,
+                        date: yesterdayStr,
+                        wake_before_8: false,
+                        steps_over_5000: false,
+                        screen_under_2hrs: false,
+                        sleep_before_1030: false,
+                        day_successful: false,
+                        points_earned: 0,
+                        submitted: true,
+                    })
+            }
 
             if (profileData.last_active_date) {
                 const lastActive = new Date(profileData.last_active_date)
