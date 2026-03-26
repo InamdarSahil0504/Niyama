@@ -102,6 +102,17 @@ export default function Dashboard({ session }) {
     const [lastHabitCount, setLastHabitCount] = useState(0)
     useEffect(() => { fetchData() }, [])
 
+    const allFourChecked = HABITS.every(h => habits[h.key] === true)
+
+    useEffect(() => {
+        const count = HABITS.filter(h => habits[h.key]).length
+        if (count === 4 && lastHabitCount < 4 && !todayHabits?.submitted) {
+            setShowCelebration(true)
+            setTimeout(() => setShowCelebration(false), 3500)
+        }
+        setLastHabitCount(count)
+    }, [habits])
+
     async function fetchData() {
         setLoading(true)
         const userId = session.user.id
@@ -232,16 +243,7 @@ export default function Dashboard({ session }) {
     const isInactive = (profile?.consecutive_inactive_days || 0) >= 5
     const isEligible = successfulDays >= 7 && !isInactive
     const noneSelected = !Object.values(habits).some(v => v === true)
-    const allFourChecked = HABITS.every(h => habits[h.key] === true)
 
-    useEffect(() => {
-        const count = HABITS.filter(h => habits[h.key]).length
-        if (count === 4 && lastHabitCount < 4 && !todayHabits?.submitted) {
-            setShowCelebration(true)
-            setTimeout(() => setShowCelebration(false), 3500)
-        }
-        setLastHabitCount(count)
-    }, [habits])
     const tierLabel = profile?.tier ? profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1) : 'Free'
 
     const NavIcon = ({ tab }) => {
