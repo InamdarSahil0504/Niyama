@@ -5,81 +5,69 @@ export default function Rewards({ profile }) {
 
     const brands = [
         { name: 'Amazon', category: 'Shopping', icon: '🛍️' },
-        { name: 'Starbucks', category: 'Food & drink', icon: '☕' },
+        { name: 'Starbucks', category: 'Food and drink', icon: '☕' },
         { name: 'Netflix', category: 'Entertainment', icon: '🎬' },
         { name: 'Uber', category: 'Transport', icon: '🚗' },
         { name: 'Airbnb', category: 'Travel', icon: '🏠' },
         { name: 'Spotify', category: 'Music', icon: '🎵' },
     ]
 
+    const card = { background: 'var(--theme-card)', border: '1px solid var(--theme-border)', borderRadius: '16px', padding: '24px', marginBottom: '16px' }
+
     return (
-        <div className="min-h-screen bg-gray-950 text-white px-4 py-8 max-w-lg mx-auto pb-24">
+        <div style={{ minHeight: '100vh', background: 'var(--theme-bg)' }} className="px-4 py-8 max-w-lg mx-auto pb-24">
 
-            <h2 className="text-xl font-bold mb-2">Rewards</h2>
-            <p className="text-gray-400 text-sm mb-6">See what you can earn with your points</p>
+            <h2 style={{ fontSize: '22px', fontWeight: '700', color: 'var(--theme-text)', marginBottom: '6px' }}>Rewards</h2>
+            <p style={{ fontSize: '14px', color: 'var(--theme-text-secondary)', marginBottom: '24px' }}>See what you can earn with your points</p>
 
-            {/* Your reward potential */}
-            <div className="bg-indigo-900 rounded-2xl p-6 mb-6">
-                <p className="text-indigo-300 text-sm mb-1">Your reward potential</p>
-                <p className="text-4xl font-bold">${cap}.00<span className="text-lg text-indigo-300">/mo</span></p>
-                <p className="text-indigo-300 text-sm mt-2 capitalize">{tier} plan</p>
-                {tier === 'premium' && (
-                    <p className="text-indigo-200 text-xs mt-2">
-                        🏆 Unlock up to $25 with a Successful 25-day streak
-                    </p>
-                )}
+            {/* Reward potential */}
+            <div style={{ background: 'var(--theme-primary)', borderRadius: '16px', padding: '24px', marginBottom: '16px', color: 'white' }}>
+                <p style={{ fontSize: '14px', opacity: '0.8', marginBottom: '4px' }}>Your reward potential</p>
+                <p style={{ fontSize: '40px', fontWeight: '700' }}>${cap}.00<span style={{ fontSize: '18px', opacity: '0.8' }}>/mo</span></p>
+                <p style={{ fontSize: '14px', marginTop: '8px', opacity: '0.8', textTransform: 'capitalize' }}>{tier} plan</p>
+                {tier === 'premium' && <p style={{ fontSize: '12px', marginTop: '8px', opacity: '0.9' }}>🏆 Unlock up to $25 with a 25-day streak</p>}
             </div>
 
             {/* How it works */}
-            <div className="bg-gray-900 rounded-2xl p-6 mb-6">
-                <h3 className="text-white font-semibold mb-4">How rewards work</h3>
-                <div className="space-y-3 text-sm">
-                    <div className="flex gap-3">
-                        <span className="text-indigo-400 font-bold">1.</span>
-                        <p className="text-gray-400">Complete your daily habits and earn points</p>
-                    </div>
-                    <div className="flex gap-3">
-                        <span className="text-indigo-400 font-bold">2.</span>
-                        <p className="text-gray-400">Accumulate points throughout the month</p>
-                    </div>
-                    <div className="flex gap-3">
-                        <span className="text-indigo-400 font-bold">3.</span>
-                        <p className="text-gray-400">At month end your points convert to a reward</p>
-                    </div>
-                    <div className="flex gap-3">
-                        <span className="text-indigo-400 font-bold">4.</span>
-                        <p className="text-gray-400">Receive a coupon code redeemable at your chosen brand</p>
-                    </div>
+            <div style={card}>
+                <h3 style={{ fontWeight: '600', color: 'var(--theme-text)', marginBottom: '16px' }}>How rewards work</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {[
+                        'Complete your daily habits and earn points',
+                        'Accumulate points throughout the month',
+                        'At month end your points convert to a reward',
+                        'Receive a coupon code redeemable at your chosen brand',
+                    ].map((step, i) => (
+                        <div key={i} style={{ display: 'flex', gap: '12px' }}>
+                            <span style={{ fontWeight: '700', color: 'var(--theme-primary)', flexShrink: '0' }}>{i + 1}.</span>
+                            <p style={{ fontSize: '14px', color: 'var(--theme-text-secondary)', lineHeight: '1.6' }}>{step}</p>
+                        </div>
+                    ))}
                 </div>
             </div>
 
-            {/* Coming soon banner */}
-            <div className="bg-amber-950 border border-amber-800 rounded-2xl p-4 mb-6">
-                <p className="text-amber-300 text-sm text-center">
+            {/* Beta notice */}
+            <div style={{ background: 'var(--theme-secondary-light)', border: '1px solid var(--theme-border)', borderRadius: '16px', padding: '16px', marginBottom: '16px' }}>
+                <p style={{ fontSize: '13px', textAlign: 'center', color: 'var(--theme-secondary)' }}>
                     🧪 Rewards are coming after beta. Here's a preview of where you'll be able to redeem them.
                 </p>
             </div>
 
             {/* Brand catalogue */}
-            <div className="bg-gray-900 rounded-2xl p-6">
-                <h3 className="text-white font-semibold mb-4">Where you can redeem</h3>
-                <div className="grid grid-cols-2 gap-3">
+            <div style={card}>
+                <h3 style={{ fontWeight: '600', color: 'var(--theme-text)', marginBottom: '16px' }}>Where you can redeem</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                     {brands.map(brand => (
-                        <div
-                            key={brand.name}
-                            className="bg-gray-800 rounded-xl p-4 flex items-center gap-3"
-                        >
-                            <span style={{ fontSize: '24px' }}>{brand.icon}</span>
+                        <div key={brand.name} style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', borderRadius: '12px', padding: '14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <span style={{ fontSize: '22px' }}>{brand.icon}</span>
                             <div>
-                                <p className="text-white text-sm font-medium">{brand.name}</p>
-                                <p className="text-gray-500 text-xs">{brand.category}</p>
+                                <p style={{ fontSize: '13px', fontWeight: '500', color: 'var(--theme-text)' }}>{brand.name}</p>
+                                <p style={{ fontSize: '11px', color: 'var(--theme-text-muted)' }}>{brand.category}</p>
                             </div>
                         </div>
                     ))}
                 </div>
-                <p className="text-gray-600 text-xs text-center mt-4">
-                    More brands available after beta launch
-                </p>
+                <p style={{ fontSize: '12px', textAlign: 'center', color: 'var(--theme-text-muted)', marginTop: '16px' }}>More brands available after beta launch</p>
             </div>
 
         </div>

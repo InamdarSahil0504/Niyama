@@ -7,167 +7,103 @@ export default function Analytics({ profile, streak }) {
     const currentStreak = streak?.current_streak || 0
     const longestStreak = streak?.longest_streak || 0
     const pointsValue = (monthlyPoints / 1000).toFixed(2)
+    const completionRate = totalDaysLogged > 0 ? Math.round((overallSuccessfulDays / totalDaysLogged) * 100) : 0
+    const monthlyCompletionRate = Math.round((successfulDays / 30) * 100)
+    const avgHabitsPerDayOverall = totalDaysLogged > 0 ? (totalHabitsCompleted / totalDaysLogged).toFixed(1) : '0.0'
+    const overallHabitRate = totalDaysLogged > 0 ? Math.round((totalHabitsCompleted / (totalDaysLogged * 4)) * 100) : 0
 
-    const completionRate = totalDaysLogged > 0
-        ? Math.round((overallSuccessfulDays / totalDaysLogged) * 100)
-        : 0
+    const card = { background: 'var(--theme-card)', border: '1px solid var(--theme-border)', borderRadius: '16px', padding: '24px', marginBottom: '16px' }
+    const sectionTitle = { fontSize: '12px', fontWeight: '600', color: 'var(--theme-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '16px' }
+    const statLabel = { fontSize: '12px', color: 'var(--theme-text-secondary)', marginBottom: '4px' }
+    const statVal = { fontSize: '28px', fontWeight: '700', color: 'var(--theme-text)' }
+    const statSub = { fontSize: '11px', color: 'var(--theme-text-muted)', marginTop: '2px' }
 
-    const monthlyCompletionRate = successfulDays > 0
-        ? Math.round((successfulDays / 30) * 100)
-        : 0
-
-    const avgHabitsPerDayOverall = totalDaysLogged > 0
-        ? (totalHabitsCompleted / totalDaysLogged).toFixed(1)
-        : '0.0'
-
-    const avgHabitsPerDayMonthly = successfulDays > 0
-        ? ((successfulDays * 4) / 30).toFixed(1)
-        : '0.0'
+    function ProgressBar({ value, max = 100 }) {
+        return (
+            <div style={{ background: 'var(--theme-primary-light)', borderRadius: '4px', height: '8px', marginTop: '6px' }}>
+                <div style={{ background: 'var(--theme-primary)', borderRadius: '4px', height: '8px', width: `${Math.min((value / max) * 100, 100)}%`, transition: 'width 0.3s' }} />
+            </div>
+        )
+    }
 
     return (
-        <div className="min-h-screen bg-gray-950 text-white px-4 py-8 max-w-lg mx-auto pb-24">
+        <div style={{ minHeight: '100vh', background: 'var(--theme-bg)' }} className="px-4 py-8 max-w-lg mx-auto pb-24">
 
-            <h2 className="text-xl font-bold mb-6">Your analytics</h2>
+            <h2 style={{ fontSize: '22px', fontWeight: '700', color: 'var(--theme-text)', marginBottom: '24px' }}>Your analytics</h2>
 
-            {/* Monthly Overview */}
-            <div className="bg-gray-900 rounded-2xl p-6 mb-4">
-                <h3 className="text-gray-400 text-sm font-medium mb-4">This month</h3>
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <p className="text-gray-400 text-sm">Monthly points</p>
-                        <p className="text-3xl font-bold mt-1 text-gray-100">{monthlyPoints}</p>
-                        <p className="text-gray-500 text-xs">max 22,500</p>
-                    </div>
-                    <div>
-                        <p className="text-gray-400 text-sm">Points value</p>
-                        <p className="text-3xl font-bold mt-1 text-gray-100 text-green-400">${pointsValue}</p>
-                        <p className="text-gray-500 text-xs">before cap</p>
-                    </div>
-                    <div>
-                        <p className="text-gray-400 text-sm">Successful days</p>
-                        <p className="text-3xl font-bold mt-1 text-gray-100">{successfulDays}</p>
-                        <p className="text-gray-500 text-xs">this month</p>
-                    </div>
-                    <div>
-                        <p className="text-gray-400 text-sm">Monthly completion</p>
-                        <p className="text-3xl font-bold mt-1 text-gray-100">{monthlyCompletionRate}%</p>
-                        <p className="text-gray-500 text-xs">of 30 days</p>
-                    </div>
+            {/* This month */}
+            <div style={card}>
+                <p style={sectionTitle}>This month</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                    <div><p style={statLabel}>Monthly points</p><p style={statVal}>{monthlyPoints}</p><p style={statSub}>max 22,500</p></div>
+                    <div><p style={statLabel}>Points value</p><p style={{ ...statVal, color: 'var(--theme-primary)' }}>${pointsValue}</p><p style={statSub}>before cap</p></div>
+                    <div><p style={statLabel}>Successful days</p><p style={statVal}>{successfulDays}</p><p style={statSub}>this month</p></div>
+                    <div><p style={statLabel}>Monthly completion</p><p style={statVal}>{monthlyCompletionRate}%</p><p style={statSub}>of 30 days</p></div>
                 </div>
             </div>
 
-            {/* All Time Stats */}
-            <div className="bg-gray-900 rounded-2xl p-6 mb-4">
-                <h3 className="text-gray-400 text-sm font-medium mb-4">All time</h3>
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <p className="text-gray-400 text-sm">Overall successful days</p>
-                        <p className="text-3xl font-bold mt-1 text-gray-100">{overallSuccessfulDays}</p>
-                        <p className="text-gray-500 text-xs">since joining</p>
-                    </div>
-                    <div>
-                        <p className="text-gray-400 text-sm">Total days logged</p>
-                        <p className="text-3xl font-bold mt-1 text-gray-100">{totalDaysLogged}</p>
-                        <p className="text-gray-500 text-xs">since joining</p>
-                    </div>
-                    <div>
-                        <p className="text-gray-400 text-sm">Overall success rate</p>
-                        <p className="text-3xl font-bold mt-1 text-gray-100">{completionRate}%</p>
-                        <p className="text-gray-500 text-xs">of days logged</p>
-                    </div>
-                    <div>
-                        <p className="text-gray-400 text-sm">Total habits completed</p>
-                        <p className="text-3xl font-bold mt-1 text-gray-100">{totalHabitsCompleted}</p>
-                        <p className="text-gray-500 text-xs">all time</p>
-                    </div>
+            {/* All time */}
+            <div style={card}>
+                <p style={sectionTitle}>All time</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                    <div><p style={statLabel}>Overall successful days</p><p style={statVal}>{overallSuccessfulDays}</p><p style={statSub}>since joining</p></div>
+                    <div><p style={statLabel}>Total days logged</p><p style={statVal}>{totalDaysLogged}</p><p style={statSub}>since joining</p></div>
+                    <div><p style={statLabel}>Overall success rate</p><p style={statVal}>{completionRate}%</p><p style={statSub}>of days logged</p></div>
+                    <div><p style={statLabel}>Total habits completed</p><p style={statVal}>{totalHabitsCompleted}</p><p style={statSub}>all time</p></div>
                 </div>
             </div>
 
-            {/* Daily Averages */}
-            <div className="bg-gray-900 rounded-2xl p-6 mb-4">
-                <h3 className="text-gray-400 text-sm font-medium mb-4">Daily averages</h3>
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <p className="text-gray-400 text-sm">Avg habits per day (overall)</p>
-                        <p className="text-3xl font-bold mt-1 text-gray-100">{avgHabitsPerDayOverall}</p>
-                        <p className="text-gray-500 text-xs">out of 4</p>
-                    </div>
-                    <div>
-                        <p className="text-gray-400 text-sm">Avg habits per day (month)</p>
-                        <p className="text-3xl font-bold mt-1 text-gray-100">{avgHabitsPerDayMonthly}</p>
-                        <p className="text-gray-500 text-xs">out of 4</p>
-                    </div>
+            {/* Daily averages */}
+            <div style={card}>
+                <p style={sectionTitle}>Daily averages</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                    <div><p style={statLabel}>Avg habits per day</p><p style={statVal}>{avgHabitsPerDayOverall}</p><p style={statSub}>out of 4</p></div>
+                    <div><p style={statLabel}>Overall habit rate</p><p style={statVal}>{overallHabitRate}%</p><p style={statSub}>of possible habits</p></div>
                 </div>
-
-                {/* Habit completion bar */}
-                <div className="mt-4">
-                    <div className="flex justify-between text-xs text-gray-500 mb-1">
-                        <span>Overall habit completion rate</span>
-                        <span>{totalDaysLogged > 0 ? Math.round((totalHabitsCompleted / (totalDaysLogged * 4)) * 100) : 0}%</span>
+                <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+                        <span style={{ color: 'var(--theme-text-secondary)' }}>Overall habit completion</span>
+                        <span style={{ color: 'var(--theme-primary)', fontWeight: '500' }}>{overallHabitRate}%</span>
                     </div>
-                    <div className="w-full bg-gray-800 rounded-full h-2">
-                        <div
-                            className="bg-indigo-400 h-2 rounded-full transition-all"
-                            style={{ width: `${totalDaysLogged > 0 ? Math.round((totalHabitsCompleted / (totalDaysLogged * 4)) * 100) : 0}%` }}
-                        />
-                    </div>
+                    <ProgressBar value={overallHabitRate} />
                 </div>
             </div>
 
-            {/* Streak Stats */}
-            <div className="bg-gray-900 rounded-2xl p-6 mb-4">
-                <h3 className="text-gray-400 text-sm font-medium mb-4">Streak stats</h3>
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <p className="text-gray-400 text-sm">Current streak</p>
-                        <p className="text-3xl font-bold mt-1 text-gray-100">{currentStreak} days</p>
-                    </div>
-                    <div>
-                        <p className="text-gray-400 text-sm">Longest streak</p>
-                        <p className="text-3xl font-bold mt-1 text-gray-100">{longestStreak} days</p>
-                    </div>
+            {/* Streak stats */}
+            <div style={card}>
+                <p style={sectionTitle}>Streak stats</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: profile?.tier === 'premium' ? '20px' : '0' }}>
+                    <div><p style={statLabel}>Current streak</p><p style={statVal}>{currentStreak} 🔥</p><p style={statSub}>days</p></div>
+                    <div><p style={statLabel}>Longest streak</p><p style={statVal}>{longestStreak}</p><p style={statSub}>days</p></div>
                 </div>
-
                 {profile?.tier === 'premium' && (
-                    <div className="mt-4">
-                        <div className="flex justify-between text-xs text-gray-500 mb-1">
-                            <span>Progress to 25-day bonus</span>
-                            <span>{currentStreak}/25</span>
+                    <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+                            <span style={{ color: 'var(--theme-text-secondary)' }}>Progress to 25-day bonus</span>
+                            <span style={{ color: 'var(--theme-primary)', fontWeight: '500' }}>{currentStreak}/25</span>
                         </div>
-                        <div className="w-full bg-gray-800 rounded-full h-2">
-                            <div
-                                className="bg-indigo-400 h-2 rounded-full transition-all"
-                                style={{ width: `${Math.min((currentStreak / 25) * 100, 100)}%` }}
-                            />
-                        </div>
+                        <ProgressBar value={currentStreak} max={25} />
                     </div>
                 )}
             </div>
 
-            {/* Eligibility Status */}
-            <div className="bg-gray-900 rounded-2xl p-6">
-                <h3 className="text-gray-400 text-sm font-medium mb-4">Reward eligibility</h3>
-                <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                        <span className="text-gray-400 text-sm">Minimum 7 successful days</span>
-                        <span className={successfulDays >= 7 ? 'text-green-400 text-sm' : 'text-gray-600 text-sm'}>
-                            {successfulDays >= 7 ? '✓ Met' : `${7 - successfulDays} remaining`}
-                        </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                        <span className="text-gray-400 text-sm">No 5+ consecutive inactive days</span>
-                        <span className={
-                            (profile?.consecutive_inactive_days || 0) < 5
-                                ? 'text-green-400 text-sm'
-                                : 'text-red-400 text-sm'
-                        }>
-                            {(profile?.consecutive_inactive_days || 0) < 5 ? '✓ Met' : '✗ Not met'}
-                        </span>
-                    </div>
+            {/* Reward eligibility */}
+            <div style={card}>
+                <p style={sectionTitle}>Reward eligibility</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {[
+                        { label: 'Minimum 7 successful days', met: successfulDays >= 7, text: successfulDays >= 7 ? '✓ Met' : `${7 - successfulDays} remaining` },
+                        { label: 'No 5+ consecutive inactive days', met: (profile?.consecutive_inactive_days || 0) < 5, text: (profile?.consecutive_inactive_days || 0) < 5 ? '✓ Met' : '✗ Not met' },
+                    ].map(item => (
+                        <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '13px', color: 'var(--theme-text-secondary)' }}>{item.label}</span>
+                            <span style={{ fontSize: '13px', fontWeight: '500', color: item.met ? 'var(--theme-primary)' : '#dc2626' }}>{item.text}</span>
+                        </div>
+                    ))}
                     {profile?.tier === 'premium' && (
-                        <div className="flex justify-between items-center">
-                            <span className="text-gray-400 text-sm">25-day streak bonus</span>
-                            <span className={streak?.streak_bonus_unlocked ? 'text-indigo-400 text-sm' : 'text-gray-600 text-sm'}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '13px', color: 'var(--theme-text-secondary)' }}>25-day streak bonus</span>
+                            <span style={{ fontSize: '13px', fontWeight: '500', color: streak?.streak_bonus_unlocked ? 'var(--theme-secondary)' : 'var(--theme-text-muted)' }}>
                                 {streak?.streak_bonus_unlocked ? '🏆 Unlocked' : 'Locked'}
                             </span>
                         </div>
