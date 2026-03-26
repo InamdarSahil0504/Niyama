@@ -21,6 +21,4 @@ dist-ssr
 *.ntvs*
 *.njsproj
 *.sln
-*.sw?
-VITE_RESEND_API_KEY=re_CcZj4Mxi_9XGR3iQCWv185G1ofv99hZmL.env
-VITE_RESEND_API_KEY=re_CcZj4Mxi_9XGR3iQCWv185G1ofv99hZmL.env.local
+*.sw?.env
