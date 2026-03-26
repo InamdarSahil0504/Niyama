@@ -3,6 +3,7 @@ import { supabase } from './supabase'
 import Auth from './components/Auth'
 import Dashboard from './components/Dashboard'
 import Admin from './components/Admin'
+import ResetPassword from './components/ResetPassword'
 
 function App() {
   const [session, setSession] = useState(null)
@@ -26,10 +27,11 @@ function App() {
   )
 
   const isAdmin = window.location.pathname === '/admin'
+  const isResetPassword = window.location.pathname === '/reset-password'
 
   return (
     <div>
-      {isAdmin ? <Admin /> : (!session ? <Auth /> : <Dashboard session={session} />)}
+      {isResetPassword ? <ResetPassword /> : isAdmin ? <Admin /> : (!session ? <Auth /> : <Dashboard session={session} />)}
     </div>
   )
 }
