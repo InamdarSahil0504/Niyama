@@ -215,14 +215,75 @@ export default function Dashboard({ session }) {
         if (daySuccessful) { newStreak += 1; if (newStreak > newLongest) newLongest = newStreak; if (newStreak >= 25) newBonus = true } else { newStreak = 0 }
 
         await supabase.from('streaks').update({ current_streak: newStreak, longest_streak: newLongest, streak_bonus_unlocked: newBonus, updated_at: new Date().toISOString() }).eq('user_id', userId)
-        await supabase.from('profiles').update({ monthly_points: monthlyPoints, successful_days: successfulDays, consecutive_inactive_days: 0, last_active_date: today, overall_successful_days: overallSuccessfulDays, total_habits_completed: totalHabitsCompleted, total_days_logged: totalDaysLogged }).eq('id', userId)
+        // Track first submission
+        const isFirstEver = totalDaysLogged === 1
+        const daysToFirst = isFirstEver ? Math.floor((new Date() - new Date(profile.created_at)) / (1000 * 60 * 60 * 24)) : profile.days_to_first_submission
+
+        await supabase.from('profiles').update({
+            monthly_points: monthlyPoints,
+            successful_days: successfulDays,
+            consecutive_inactive_days: 0,
+            last_active_date: today,
+            overall_successful_days: overallSuccessfulDays,
+            total_habits_completed: totalHabitsCompleted,
+            total_days_logged: totalDaysLogged,
+            ...(isFirstEver && { first_submission_date: today, days_to_first_submission: daysToFirst })
+        }).eq('id', userId)
+
+        if (isFirstEver) {
+            trackEvent('first_submission', { days_to_first: daysToFirst, points: points, day_successful: daySuccessful })
+        }
+        trackEvent('habit_submitted', { points, day_successful: daySuccessful, hour: new Date().getHours(), habits_completed: HABITS.filter(h => habits[h.key]).length })
+
+        // Auto-calculate and upsert rewards record
+        const currentMonth = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`
+        const caps = { free: 5, plus: 10, premium: 20 }
+        const tierCap = caps[profile?.tier || 'free']
+        const potentialReward = monthlyPoints / 1000
+        const actualReward = Math.min(potentialReward, tierCap)
+        const pointsLeftOnTable = Math.max(potentialReward - tierCap, 0)
+        const capUtilisation = tierCap > 0 ? Math.min(Math.round((potentialReward / tierCap) * 100), 100) : 0
+
+        const { data: existingReward } = await supabase.from('rewards').select('id, manual_override').eq('user_id', userId).eq('month', currentMonth).single()
+
+        if (existingReward) {
+            if (!existingReward.manual_override) {
+                await supabase.from('rewards').update({
+                    points_earned: monthlyPoints,
+                    reward_value: actualReward,
+                    reward_cap: tierCap,
+                    reward_potential: potentialReward,
+                    points_left_on_table: pointsLeftOnTable,
+                    cap_utilisation: capUtilisation,
+                }).eq('id', existingReward.id)
+            }
+        } else {
+            await supabase.from('rewards').insert({
+                user_id: userId,
+                month: currentMonth,
+                points_earned: monthlyPoints,
+                reward_value: actualReward,
+                reward_cap: tierCap,
+                reward_potential: potentialReward,
+                points_left_on_table: pointsLeftOnTable,
+                cap_utilisation: capUtilisation,
+            })
+        }
 
         await fetchData()
         setSaving(null)
     }
 
     async function signOut() { await supabase.auth.signOut() }
-
+    async function trackEvent(eventType, eventData = {}) {
+        try {
+            await supabase.from('app_events').insert({
+                user_id: session.user.id,
+                event_type: eventType,
+                event_data: { ...eventData, timestamp: new Date().toISOString(), hour: new Date().getHours() }
+            })
+        } catch (e) { }
+    }
     if (loading) return (
         <div style={{ minHeight: '100vh', background: 'var(--theme-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <div style={{ textAlign: 'center' }}>
@@ -589,7 +650,8 @@ export default function Dashboard({ session }) {
                         { key: 'rewards', label: 'Rewards' },
                         { key: 'settings', label: 'Settings' },
                     ].map(tab => (
-                        <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+                        <button key={tab.key} onClick={() => { setActiveTab(tab.key); trackEvent('page_visit', { page: tab.key }) }}
+                            onClick={() => { setActiveTab(tab.key); trackEvent('page_visit', { page: tab.key }) }}
                             style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', padding: '4px 16px', background: 'none', border: 'none', cursor: 'pointer', color: activeTab === tab.key ? 'var(--theme-primary)' : 'var(--theme-text-muted)' }}>
                             {tab.key === 'settings' ? (
                                 <svg xmlns="http://www.w3.org/2000/svg" style={{ width: '20px', height: '20px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
