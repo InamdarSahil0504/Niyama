@@ -471,6 +471,7 @@ export default function Settings({ profile, session, onSignOut }) {
                                     Member for {getMemberDays() === 0 ? 'less than a day' : `${getMemberDays()} ${getMemberDays() === 1 ? 'day' : 'days'}`}
                                 </span>
                             )}
+                            <p className="text-gray-700 text-xs text-center mt-4">Version 1.0.0 Beta</p>
                         </div>
                     </div>
                 </div>
@@ -495,7 +496,10 @@ export default function Settings({ profile, session, onSignOut }) {
 
             {/* Sign out */}
             <button
-                onClick={onSignOut}
+                onClick={() => {
+                    const confirmed = window.confirm('Are you sure you want to sign out?')
+                    if (confirmed) onSignOut()
+                }}
                 className="w-full bg-gray-900 hover:bg-gray-800 text-red-400 font-medium py-4 rounded-2xl transition text-sm mb-3"
             >
                 Sign out
@@ -507,6 +511,8 @@ export default function Settings({ profile, session, onSignOut }) {
             >
                 Delete account
             </button>
+
+            <p className="text-gray-700 text-xs text-center mt-6">Niyama · Version 1.0.0 Beta</p>
 
         </div>
     )

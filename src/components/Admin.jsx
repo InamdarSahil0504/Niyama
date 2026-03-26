@@ -244,7 +244,7 @@ export default function Admin() {
                     <h1 className="text-2xl font-bold">Admin Panel</h1>
                     <p className="text-gray-400 text-sm">{users.length} users total</p>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex gap-3 items-center">
                     <button
                         onClick={() => { setShowMetrics(!showMetrics); if (!metrics) fetchMetrics() }}
                         className={`text-sm px-4 py-2 rounded-lg transition ${showMetrics ? 'bg-indigo-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`}
@@ -256,6 +256,15 @@ export default function Admin() {
                         className="text-indigo-400 text-sm hover:text-indigo-300"
                     >
                         Refresh
+                    </button>
+                    <button
+                        onClick={async () => {
+                            const confirmed = window.confirm('Sign out of admin panel?')
+                            if (confirmed) await supabase.auth.signOut()
+                        }}
+                        className="text-red-400 text-sm hover:text-red-300"
+                    >
+                        Sign out
                     </button>
                 </div>
             </div>

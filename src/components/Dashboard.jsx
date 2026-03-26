@@ -319,7 +319,10 @@ export default function Dashboard({ session }) {
 
     if (loading) return (
         <div className="min-h-screen flex items-center justify-center bg-gray-950">
-            <p className="text-white">Loading...</p>
+            <div className="text-center">
+                <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                <p className="text-gray-400 text-sm">Loading your data...</p>
+            </div>
         </div>
     )
 
