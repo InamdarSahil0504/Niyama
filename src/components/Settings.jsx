@@ -5,7 +5,7 @@ import FounderStory from './FounderStory'
 
 const FEEDBACK_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScGtdoAUJ-9JPWYeqbd2QH71qPXFJcERubHiSjvKOMxLc1cxw/viewform?usp=header'
 
-export default function Settings({ profile, session, onSignOut }) {
+export default function Settings({ profile, session, onSignOut, onReplayTutorial }) {
     const [activePage, setActivePage] = useState(null)
     const [message, setMessage] = useState('')
     const [sending, setSending] = useState(false)
@@ -152,7 +152,13 @@ export default function Settings({ profile, session, onSignOut }) {
                         ))}
                     </div>
                 </div>
-
+                {onReplayTutorial && (
+                    <button
+                        onClick={() => { onReplayTutorial(); setActivePage(null) }}
+                        style={{ background: 'var(--theme-primary)', color: 'white', width: '100%', fontWeight: '600', padding: '14px', borderRadius: '8px', fontSize: '15px', cursor: 'pointer', marginTop: '8px' }}>
+                        Replay guided tour
+                    </button>
+                )}
             </div>
         )
     }

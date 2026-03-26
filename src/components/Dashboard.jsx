@@ -8,6 +8,7 @@ import FounderStory from './FounderStory'
 import RulesPage from './RulesPage'
 import TierDetails from './TierDetails'
 import PersonalDetails from './PersonalDetails'
+import Tutorial from './Tutorial'
 
 const HABITS = [
     { key: 'wake_before_8', label: 'Wake before 7:30 AM', points: 100, penalty: 50 },
@@ -100,6 +101,7 @@ export default function Dashboard({ session }) {
     const isPastSleepDeadline = ENFORCE_DEADLINES && (now.getHours() > 22 || (now.getHours() === 22 && now.getMinutes() >= 35))
     const [showCelebration, setShowCelebration] = useState(false)
     const [lastHabitCount, setLastHabitCount] = useState(0)
+    const [showTutorial, setShowTutorial] = useState(false)
     useEffect(() => { fetchData() }, [])
 
     const allFourChecked = HABITS.every(h => habits[h.key] === true)
@@ -156,6 +158,9 @@ export default function Dashboard({ session }) {
 
         const { data: updatedProfile } = await supabase.from('profiles').select('*').eq('id', userId).single()
         setProfile(updatedProfile)
+        if (updatedProfile && updatedProfile.onboarding_complete && !updatedProfile.tutorial_seen && updatedProfile.total_days_logged === 0) {
+            setShowTutorial(true)
+        }
         if (updatedProfile && !updatedProfile.onboarding_complete) setOnboardingStep('founder-story')
 
         const { data: streakData } = await supabase.from('streaks').select('*').eq('user_id', userId).single()
@@ -255,9 +260,15 @@ export default function Dashboard({ session }) {
         return <svg xmlns="http://www.w3.org/2000/svg" style={{ width: '20px', height: '20px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icons[tab]} /></svg>
     }
 
+    async function completeTutorial() {
+        setShowTutorial(false)
+        await supabase.from('profiles').update({ tutorial_seen: true }).eq('id', session.user.id)
+    }
+
     return (
         <div style={{ minHeight: '100vh', background: 'var(--theme-bg)' }}>
             {showCelebration && <Confetti />}
+            {showTutorial && <Tutorial profile={profile} onComplete={completeTutorial} />}
             <div style={{ maxWidth: '448px', margin: '0 auto', padding: '32px 16px 96px' }}>
 
                 {/* Header */}
@@ -565,7 +576,7 @@ export default function Dashboard({ session }) {
 
                 {activeTab === 'analytics' && <Analytics profile={profile} streak={streak} />}
                 {activeTab === 'rewards' && <Rewards profile={profile} />}
-                {activeTab === 'settings' && <Settings profile={profile} session={session} onSignOut={signOut} />}
+                {activeTab === 'settings' && <Settings profile={profile} session={session} onSignOut={signOut} onReplayTutorial={() => { setShowTutorial(true); setActiveTab('home') }} />}
 
             </div>
 
