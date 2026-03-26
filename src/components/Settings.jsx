@@ -53,6 +53,7 @@ export default function Settings({ profile, session, onSignOut }) {
         { key: 'legal', label: 'Legal disclaimer', icon: '📋' },
         { key: 'terms', label: 'Terms of service', icon: '📄' },
         { key: 'privacy', label: 'Privacy policy', icon: '🔒' },
+        { key: 'theme', label: 'Change theme', icon: '🎨' },
         { key: 'feedback', label: 'Feedback form', icon: '📝' },
         { key: 'contact', label: 'Contact us', icon: '💬' },
     ]
@@ -343,7 +344,87 @@ export default function Settings({ profile, session, onSignOut }) {
             </div>
         )
     }
+    if (activePage === 'theme') {
+        return (
+            <div className="min-h-screen bg-gray-950 text-white px-4 py-8 max-w-lg mx-auto pb-24">
+                <button onClick={() => setActivePage(null)} className="text-indigo-400 text-sm mb-6 flex items-center gap-1">
+                    &larr; Back
+                </button>
+                <h2 className="text-xl font-bold mb-2">Change theme</h2>
+                <p className="text-gray-400 text-sm mb-6">Choose your preferred color theme.</p>
 
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                    {/* Sage theme */}
+                    <button
+                        onClick={async () => {
+                            await supabase.from('profiles').update({ color_theme: 'sage' }).eq('id', session.user.id)
+                            const root = document.documentElement
+                            root.style.setProperty('--theme-bg', '#F4F7F5')
+                            root.style.setProperty('--theme-primary', '#5A8A78')
+                            root.style.setProperty('--theme-secondary', '#D4735F')
+                            root.style.setProperty('--theme-border', '#D9E5DF')
+                            root.style.setProperty('--theme-primary-light', '#EAF2EE')
+                            root.style.setProperty('--theme-secondary-light', '#FCEEE9')
+                            setActivePage(null)
+                        }}
+                        className={`rounded-xl overflow-hidden border-2 transition ${profile?.color_theme === 'sage' ? 'border-indigo-500' : 'border-gray-700'}`}
+                    >
+                        <div style={{ background: '#F4F7F5' }} className="p-3">
+                            <div style={{ background: '#5A8A78' }} className="rounded-lg p-2 mb-2">
+                                <div className="h-2 rounded bg-white opacity-60 mb-1"></div>
+                                <div className="h-2 rounded bg-white opacity-40 w-3/4"></div>
+                            </div>
+                            <div style={{ background: '#FFFFFF', border: '1px solid #D9E5DF' }} className="rounded-lg p-2">
+                                <div className="h-1.5 rounded mb-1" style={{ background: '#5A8A78', width: '60%' }}></div>
+                                <div className="h-5 rounded mt-2" style={{ background: '#D4735F' }}></div>
+                            </div>
+                        </div>
+                        <div style={{ background: '#F4F7F5', borderTop: '1px solid #D9E5DF' }} className="py-2">
+                            <p className="text-xs font-medium text-center" style={{ color: '#1A1A1A' }}>Sage</p>
+                            <p className="text-xs text-center" style={{ color: '#6B7280' }}>Green dominant</p>
+                        </div>
+                    </button>
+
+                    {/* Salmon theme */}
+                    <button
+                        onClick={async () => {
+                            await supabase.from('profiles').update({ color_theme: 'salmon' }).eq('id', session.user.id)
+                            const root = document.documentElement
+                            root.style.setProperty('--theme-bg', '#F7F4F4')
+                            root.style.setProperty('--theme-primary', '#D4735F')
+                            root.style.setProperty('--theme-secondary', '#5A8A78')
+                            root.style.setProperty('--theme-border', '#E5D9D5')
+                            root.style.setProperty('--theme-primary-light', '#FCEEE9')
+                            root.style.setProperty('--theme-secondary-light', '#EAF2EE')
+                            setActivePage(null)
+                        }}
+                        className={`rounded-xl overflow-hidden border-2 transition ${profile?.color_theme === 'salmon' ? 'border-indigo-500' : 'border-gray-700'}`}
+                    >
+                        <div style={{ background: '#F7F4F4' }} className="p-3">
+                            <div style={{ background: '#D4735F' }} className="rounded-lg p-2 mb-2">
+                                <div className="h-2 rounded bg-white opacity-60 mb-1"></div>
+                                <div className="h-2 rounded bg-white opacity-40 w-3/4"></div>
+                            </div>
+                            <div style={{ background: '#FFFFFF', border: '1px solid #E5D9D5' }} className="rounded-lg p-2">
+                                <div className="h-1.5 rounded mb-1" style={{ background: '#D4735F', width: '60%' }}></div>
+                                <div className="h-5 rounded mt-2" style={{ background: '#5A8A78' }}></div>
+                            </div>
+                        </div>
+                        <div style={{ background: '#F7F4F4', borderTop: '1px solid #E5D9D5' }} className="py-2">
+                            <p className="text-xs font-medium text-center" style={{ color: '#1A1A1A' }}>Salmon</p>
+                            <p className="text-xs text-center" style={{ color: '#6B7280' }}>Pink dominant</p>
+                        </div>
+                    </button>
+                </div>
+
+                {profile?.color_theme === 'sage' || !profile?.color_theme ? (
+                    <p className="text-gray-500 text-xs text-center">Currently using Sage theme</p>
+                ) : (
+                    <p className="text-gray-500 text-xs text-center">Currently using Salmon theme</p>
+                )}
+            </div>
+        )
+    }
     if (activePage === 'feedback') {
         return (
             <div className="min-h-screen bg-gray-950 text-white px-4 py-8 max-w-lg mx-auto pb-24">

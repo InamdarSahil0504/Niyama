@@ -7,6 +7,7 @@ import Settings from './Settings'
 import FounderStory from './FounderStory'
 import RulesPage from './RulesPage'
 import TierDetails from './TierDetails'
+import PersonalDetails from './PersonalDetails'
 const HABITS = [
     { key: 'wake_before_8', label: 'Wake before 7:30 AM', points: 100, penalty: 50 },
     { key: 'steps_over_5000', label: 'Steps 10,000 or more', points: 100, penalty: 75 },
@@ -53,6 +54,8 @@ function calcReward(monthlyPoints, tier, streakBonusUnlocked, successfulDays, co
 export default function Dashboard({ session }) {
     const [profile, setProfile] = useState(null)
     const [onboardingStep, setOnboardingStep] = useState(null)
+    const [isMinor, setIsMinor] = useState(false)
+    const [colorTheme, setColorTheme] = useState('sage')
     const [streak, setStreak] = useState(null)
     const [todayHabits, setTodayHabits] = useState(null)
     const [loading, setLoading] = useState(true)
@@ -71,7 +74,26 @@ export default function Dashboard({ session }) {
     useEffect(() => {
         fetchData()
     }, [])
-
+    function applyTheme(theme) {
+        const root = document.documentElement
+        if (theme === 'salmon') {
+            root.style.setProperty('--theme-bg', '#F7F4F4')
+            root.style.setProperty('--theme-primary', '#D4735F')
+            root.style.setProperty('--theme-secondary', '#5A8A78')
+            root.style.setProperty('--theme-border', '#E5D9D5')
+            root.style.setProperty('--theme-card', '#FFFFFF')
+            root.style.setProperty('--theme-primary-light', '#FCEEE9')
+            root.style.setProperty('--theme-secondary-light', '#EAF2EE')
+        } else {
+            root.style.setProperty('--theme-bg', '#F4F7F5')
+            root.style.setProperty('--theme-primary', '#5A8A78')
+            root.style.setProperty('--theme-secondary', '#D4735F')
+            root.style.setProperty('--theme-border', '#D9E5DF')
+            root.style.setProperty('--theme-card', '#FFFFFF')
+            root.style.setProperty('--theme-primary-light', '#EAF2EE')
+            root.style.setProperty('--theme-secondary-light', '#FCEEE9')
+        }
+    }
     async function fetchData() {
         setLoading(true)
         const userId = session.user.id
@@ -174,6 +196,13 @@ export default function Dashboard({ session }) {
         const { data: updatedProfile } = await supabase
             .from('profiles').select('*').eq('id', userId).single()
         setProfile(updatedProfile)
+        if (updatedProfile?.color_theme) {
+            setColorTheme(updatedProfile.color_theme)
+            applyTheme(updatedProfile.color_theme)
+        }
+        if (updatedProfile?.is_minor) {
+            setIsMinor(updatedProfile.is_minor)
+        }
         // Check if onboarding is needed
         if (updatedProfile && !updatedProfile.onboarding_complete) {
             setOnboardingStep('founder-story')
@@ -342,10 +371,22 @@ export default function Dashboard({ session }) {
 
     if (onboardingStep === 'tier-details') {
         return (
-            <TierDetails onContinue={async () => {
-                await supabase.from('profiles').update({ onboarding_complete: true }).eq('id', session.user.id)
-                setOnboardingStep(null)
-            }} />
+            <TierDetails onContinue={() => setOnboardingStep('personal-details')} />
+        )
+    }
+
+    if (onboardingStep === 'personal-details') {
+        return (
+            <PersonalDetails
+                userId={session.user.id}
+                onContinue={async (minor, theme) => {
+                    setIsMinor(minor)
+                    setColorTheme(theme)
+                    applyTheme(theme)
+                    await supabase.from('profiles').update({ onboarding_complete: true }).eq('id', session.user.id)
+                    setOnboardingStep(null)
+                }}
+            />
         )
     }
 
@@ -363,7 +404,7 @@ export default function Dashboard({ session }) {
 
     const todayPoints = calcLivePoints(habits)
     const successfulDays = profile?.successful_days || 0
-    const reward = calcReward(
+    const reward = isMinor ? '0.00' : calcReward(
         profile?.monthly_points || 0,
         profile?.tier || 'free',
         streak?.streak_bonus_unlocked || false,
@@ -572,6 +613,13 @@ export default function Dashboard({ session }) {
                                     <span className="font-semibold">${remaining}</span>
                                 </div>
                             </div>
+                            {isMinor && (
+                                <div className="bg-amber-900 rounded-lg p-3 mt-4">
+                                    <p className="text-amber-300 text-sm text-center">
+                                        Rewards and subscriptions are available when you turn 18
+                                    </p>
+                                </div>
+                            )}
                             {isInactive && (
                                 <div className="bg-red-900 rounded-lg p-3 mt-4">
                                     <p className="text-red-300 text-sm text-center">⚠️ Ineligible — more than 5 consecutive inactive days</p>

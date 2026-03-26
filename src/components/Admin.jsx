@@ -436,6 +436,12 @@ export default function Admin() {
                                     <div>
                                         <p className="font-semibold text-lg">{user.full_name || 'No name'}</p>
                                         <p className="text-gray-400 text-sm">{user.id}</p>
+                                        <div className="flex gap-2 mt-1 flex-wrap">
+                                            {user.gender && <span className="bg-gray-800 text-gray-400 text-xs px-2 py-0.5 rounded-full">{user.gender}</span>}
+                                            {user.age && <span className="bg-gray-800 text-gray-400 text-xs px-2 py-0.5 rounded-full">Age {user.age}</span>}
+                                            {user.is_minor && <span className="bg-amber-900 text-amber-300 text-xs px-2 py-0.5 rounded-full">Minor</span>}
+                                            {user.color_theme && <span className="bg-gray-800 text-gray-400 text-xs px-2 py-0.5 rounded-full capitalize">{user.color_theme} theme</span>}
+                                        </div>
                                     </div>
                                     <div className="text-right">
                                         <p className="text-green-400 font-semibold">{calcReward(user)}</p>
