@@ -1,10 +1,144 @@
-import { useState } from 'react'
 import { supabase } from '../supabase'
 import About from './About'
 import FounderStory from './FounderStory'
-
+import { useState, useEffect, useRef } from 'react'
 const FEEDBACK_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScGtdoAUJ-9JPWYeqbd2QH71qPXFJcERubHiSjvKOMxLc1cxw/viewform?usp=header'
+function ContactChat({ session, profile }) {
+    const [messages, setMessages] = useState([])
+    const [input, setInput] = useState('')
+    const [sending, setSending] = useState(false)
+    const [loading, setLoading] = useState(true)
+    const [conversation, setConversation] = useState(null)
+    const bottomRef = useRef(null)
 
+    useEffect(() => {
+        loadMessages()
+        const interval = setInterval(loadMessages, 30000)
+        window._chatRefresh = interval
+        return () => clearInterval(interval)
+    }, [])
+
+    useEffect(() => {
+        bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }, [messages])
+
+    async function loadMessages() {
+        const { data } = await supabase
+            .from('contact_messages')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .order('created_at', { ascending: true })
+        if (data && data.length > 0) {
+            setMessages(data)
+            setConversation(data[0])
+        } else {
+            setMessages([])
+            setConversation(null)
+        }
+        setLoading(false)
+    }
+
+    async function sendMessage() {
+        if (!input.trim()) return
+        setSending(true)
+        const isResolved = conversation?.resolved
+        const resolvedAt = conversation?.resolved_at
+        const hoursSinceResolved = isResolved && resolvedAt
+            ? (new Date() - new Date(resolvedAt)) / (1000 * 60 * 60)
+            : null
+        const canStartNew = !isResolved || (hoursSinceResolved !== null && hoursSinceResolved >= 24)
+
+        if (!canStartNew) {
+            setSending(false)
+            return
+        }
+
+        const existingConvId = messages.length > 0 && !canStartNew
+            ? messages[0].conversation_id
+            : (canStartNew && isResolved ? undefined : messages[0]?.conversation_id)
+
+        await supabase.from('contact_messages').insert({
+            user_id: session.user.id,
+            user_name: profile?.full_name || 'User',
+            email: session.user.email,
+            message: input.trim(),
+            sender: 'user',
+            read_by_admin: false,
+            conversation_id: existingConvId || undefined,
+        })
+        setInput('')
+        await loadMessages()
+        setSending(false)
+    }
+
+    if (loading) return <p style={{ fontSize: '14px', color: 'var(--theme-text-secondary)' }}>Loading...</p>
+
+    const isResolved = conversation?.resolved
+    const resolvedAt = conversation?.resolved_at
+    const hoursSinceResolved = isResolved && resolvedAt
+        ? (new Date() - new Date(resolvedAt)) / (1000 * 60 * 60)
+        : null
+    const chatCleared = isResolved && hoursSinceResolved !== null && hoursSinceResolved >= 24
+    const visibleMessages = chatCleared ? [] : messages
+
+    return (
+        <div>
+            {/* Chat window */}
+            <div style={{ background: 'var(--theme-card)', border: '1px solid var(--theme-border)', borderRadius: '16px', padding: '16px', marginBottom: '12px', minHeight: '250px', maxHeight: '400px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {visibleMessages.length === 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '200px', gap: '8px' }}>
+                        <p style={{ fontSize: '24px' }}>💬</p>
+                        <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--theme-text)' }}>Start a conversation</p>
+                        <p style={{ fontSize: '12px', color: 'var(--theme-text-secondary)', textAlign: 'center' }}>Send us a message and we'll get back to you as soon as possible.</p>
+                    </div>
+                ) : (
+                    visibleMessages.map((msg, i) => {
+                        const isUser = msg.sender === 'user'
+                        const isAdmin = msg.sender === 'admin'
+                        return (
+                            <div key={msg.id || i} style={{ display: 'flex', justifyContent: isUser ? 'flex-end' : 'flex-start' }}>
+                                {isAdmin && (
+                                    <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--theme-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', color: 'white', flexShrink: 0, marginRight: '8px', alignSelf: 'flex-end' }}>N</div>
+                                )}
+                                <div style={{ maxWidth: '75%' }}>
+                                    <div style={{ padding: '10px 14px', borderRadius: isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px', fontSize: '14px', lineHeight: '1.5', background: isUser ? 'var(--theme-primary)' : 'var(--theme-bg)', color: isUser ? 'white' : 'var(--theme-text)', border: isUser ? 'none' : '1px solid var(--theme-border)' }}>
+                                        {msg.message}
+                                    </div>
+                                    <p style={{ fontSize: '10px', color: 'var(--theme-text-muted)', marginTop: '3px', textAlign: isUser ? 'right' : 'left' }}>
+                                        {isAdmin ? 'Niyama team · ' : ''}{new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </p>
+                                </div>
+                            </div>
+                        )
+                    })
+                )}
+                <div ref={bottomRef} />
+            </div>
+
+            {/* Resolved notice */}
+            {isResolved && !chatCleared && (
+                <div style={{ background: 'var(--theme-primary-light)', border: '1px solid var(--theme-border)', borderRadius: '10px', padding: '10px 14px', marginBottom: '12px', textAlign: 'center' }}>
+                    <p style={{ fontSize: '13px', color: 'var(--theme-primary)', fontWeight: '500' }}>✓ This conversation has been resolved</p>
+                    <p style={{ fontSize: '11px', color: 'var(--theme-text-secondary)', marginTop: '3px' }}>Thank you for reaching out. This window will reset in 24 hours.</p>
+                </div>
+            )}
+
+            {/* Input */}
+            {(!isResolved || chatCleared) && (
+                <div style={{ display: 'flex', gap: '8px' }}>
+                    <input type="text" placeholder="Type your message..." value={input}
+                        onChange={e => setInput(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && !sending && sendMessage()}
+                        style={{ flex: 1, background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-text)', borderRadius: '12px', padding: '12px 16px', fontSize: '14px', outline: 'none' }} />
+                    <button onClick={sendMessage} disabled={sending || !input.trim()}
+                        style={{ background: 'var(--theme-primary)', color: 'white', padding: '12px 16px', borderRadius: '12px', fontWeight: '600', cursor: 'pointer', opacity: (sending || !input.trim()) ? 0.5 : 1, border: 'none' }}>
+                        {sending ? '...' : 'Send'}
+                    </button>
+                </div>
+            )}
+        </div>
+    )
+}
 export default function Settings({ profile, session, onSignOut, onReplayTutorial }) {
     const [activePage, setActivePage] = useState(null)
     const [message, setMessage] = useState('')
@@ -40,6 +174,7 @@ export default function Settings({ profile, session, onSignOut, onReplayTutorial
         { key: 'terms', label: 'Terms of service', icon: '📄' },
         { key: 'privacy', label: 'Privacy policy', icon: '🔒' },
         { key: 'theme', label: 'Change theme', icon: '🎨' },
+        { key: 'notifications', label: 'Notification preferences', icon: '🔔' },
         { key: 'feedback', label: 'Feedback form', icon: '📝' },
         { key: 'contact', label: 'Contact us', icon: '💬' },
     ]
@@ -436,7 +571,53 @@ export default function Settings({ profile, session, onSignOut, onReplayTutorial
             </div>
         )
     }
+    if (activePage === 'notifications') {
+        return (
+            <div style={pageStyle}>
+                <button style={backBtn} onClick={() => setActivePage(null)}>← Back</button>
+                <h2 style={{ fontSize: '22px', fontWeight: '700', color: 'var(--theme-text)', marginBottom: '6px' }}>Notification preferences</h2>
+                <p style={{ fontSize: '14px', color: 'var(--theme-text-secondary)', marginBottom: '24px' }}>Manage your email reminders.</p>
 
+                <div style={{ background: 'var(--theme-card)', border: '1px solid var(--theme-border)', borderRadius: '16px', padding: '20px', marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                        <div>
+                            <p style={{ fontSize: '15px', fontWeight: '500', color: 'var(--theme-text)', marginBottom: '3px' }}>Daily habit reminders</p>
+                            <p style={{ fontSize: '13px', color: 'var(--theme-text-secondary)' }}>Receive email reminders to log your habits</p>
+                        </div>
+                        <button onClick={async () => {
+                            const newVal = !profile?.email_reminders
+                            await supabase.from('profiles').update({ email_reminders: newVal }).eq('id', session.user.id)
+                            window.location.reload()
+                        }}
+                            style={{ width: '44px', height: '24px', borderRadius: '12px', border: 'none', cursor: 'pointer', background: profile?.email_reminders !== false ? 'var(--theme-primary)' : '#D1D5DB', position: 'relative', transition: 'background 0.2s' }}>
+                            <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'white', position: 'absolute', top: '3px', transition: 'left 0.2s', left: profile?.email_reminders !== false ? '23px' : '3px' }} />
+                        </button>
+                    </div>
+
+                    <div style={{ borderTop: '1px solid var(--theme-border)', paddingTop: '16px' }}>
+                        <p style={{ fontSize: '13px', color: 'var(--theme-text-secondary)', marginBottom: '8px' }}>You will receive:</p>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            {[
+                                { time: '2:30 PM', desc: 'Motivational mid-day nudge — check your steps and screen time' },
+                                { time: '9:00 PM', desc: 'Wind down reminder — log your habits and get to bed on time' },
+                            ].map(item => (
+                                <div key={item.time} style={{ display: 'flex', gap: '12px', padding: '10px', background: 'var(--theme-bg)', borderRadius: '10px' }}>
+                                    <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--theme-primary)', flexShrink: 0, minWidth: '52px' }}>{item.time}</span>
+                                    <p style={{ fontSize: '13px', color: 'var(--theme-text-secondary)', lineHeight: '1.5' }}>{item.desc}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                <div style={{ background: 'var(--theme-primary-light)', border: '1px solid var(--theme-border)', borderRadius: '12px', padding: '14px' }}>
+                    <p style={{ fontSize: '12px', color: 'var(--theme-text-secondary)', lineHeight: '1.6' }}>
+                        Reminders are only sent on days when you have not yet submitted your habits. We will never send more than 2 emails per day.
+                    </p>
+                </div>
+            </div>
+        )
+    }
     if (activePage === 'feedback') {
         return (
             <div style={pageStyle}>
@@ -457,34 +638,10 @@ export default function Settings({ profile, session, onSignOut, onReplayTutorial
     if (activePage === 'contact') {
         return (
             <div style={pageStyle}>
-                <button style={backBtn} onClick={() => setActivePage(null)}>← Back</button>
+                <button style={backBtn} onClick={() => { setActivePage(null); clearInterval(window._chatRefresh) }}>← Back</button>
                 <h2 style={{ fontSize: '22px', fontWeight: '700', color: 'var(--theme-text)', marginBottom: '6px' }}>Contact us</h2>
                 <p style={{ fontSize: '14px', color: 'var(--theme-text-secondary)', marginBottom: '24px' }}>Have a question? Send us a message.</p>
-                <div style={{ background: 'var(--theme-card)', border: '1px solid var(--theme-border)', borderRadius: '16px', padding: '16px', marginBottom: '16px', minHeight: '200px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {chatMessages.map((msg, i) => (
-                        <div key={i} style={{ display: 'flex', justifyContent: msg.from === 'user' ? 'flex-end' : 'flex-start' }}>
-                            <div style={{
-                                maxWidth: '280px', padding: '10px 14px', borderRadius: '16px', fontSize: '14px',
-                                background: msg.from === 'user' ? 'var(--theme-primary)' : 'var(--theme-bg)',
-                                color: msg.from === 'user' ? 'white' : 'var(--theme-text)',
-                                border: msg.from === 'user' ? 'none' : '1px solid var(--theme-border)',
-                                borderBottomRightRadius: msg.from === 'user' ? '4px' : '16px',
-                                borderBottomLeftRadius: msg.from === 'user' ? '16px' : '4px',
-                            }}>
-                                {msg.text}
-                            </div>
-                        </div>
-                    ))}
-                    {sending && <div style={{ display: 'flex', justifyContent: 'flex-start' }}><div style={{ padding: '10px 14px', borderRadius: '16px', fontSize: '14px', background: 'var(--theme-bg)', color: 'var(--theme-text-muted)', border: '1px solid var(--theme-border)' }}>Typing...</div></div>}
-                </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                    <input type="text" placeholder="Type your message..." value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendMessage()}
-                        style={{ flex: '1', background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-text)', borderRadius: '12px', padding: '12px 16px', fontSize: '14px', outline: 'none' }} />
-                    <button onClick={sendMessage} disabled={sending || !chatInput.trim()}
-                        style={{ background: 'var(--theme-primary)', color: 'white', padding: '12px 16px', borderRadius: '12px', fontWeight: '600', cursor: 'pointer', opacity: (sending || !chatInput.trim()) ? '0.5' : '1' }}>
-                        Send
-                    </button>
-                </div>
+                <ContactChat session={session} profile={profile} />
             </div>
         )
     }

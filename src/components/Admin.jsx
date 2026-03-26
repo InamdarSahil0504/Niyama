@@ -73,6 +73,12 @@ export default function Admin() {
     const [showManualReport, setShowManualReport] = useState(false)
     const [exportMode, setExportMode] = useState(false)
     const [showColumnPicker, setShowColumnPicker] = useState(false)
+    const [unreadCount, setUnreadCount] = useState(0)
+    const [replyText, setReplyText] = useState('')
+    const [sendingReply, setSendingReply] = useState(false)
+    const [resolvingConversation, setResolvingConversation] = useState(false)
+    const [userMessages, setUserMessages] = useState([])
+    const [loadingMessages, setLoadingMessages] = useState(false)
 
     function handleLogin() {
         if (password === ADMIN_PASSWORD) { setAuthed(true); fetchData() }
@@ -103,6 +109,20 @@ export default function Admin() {
         setAllHabits(habitData || [])
         const { data: npsData } = await supabase.from('admin_adjustments').select('adjustment').eq('reason', 'nps_score').order('created_at', { ascending: false }).limit(1)
         setSavedNps(npsData?.[0]?.adjustment || null)
+        // Count unread messages
+        const { data: unreadData } = await supabase
+            .from('contact_messages')
+            .select('user_id')
+            .eq('read_by_admin', false)
+            .eq('sender', 'user')
+        const uniqueUnread = new Set(unreadData?.map(m => m.user_id) || [])
+        setUnreadCount(uniqueUnread.size)
+        // Fetch all messages for the messages tab
+        const { data: allMessages } = await supabase
+            .from('contact_messages')
+            .select('*')
+            .order('created_at', { ascending: true })
+        setUserMessages(allMessages || [])
         setLoading(false)
     }
 
@@ -110,7 +130,87 @@ export default function Admin() {
         const { data } = await supabase.from('admin_notes').select('*').eq('user_id', userId).order('created_at', { ascending: false })
         setAdminNotes(data || [])
     }
+    async function fetchUserMessages(userId) {
+        setLoadingMessages(true)
+        const { data } = await supabase
+            .from('contact_messages')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: true })
+        setUserMessages(data || [])
+        // Mark all as read
+        await supabase
+            .from('contact_messages')
+            .update({ read_by_admin: true })
+            .eq('user_id', userId)
+            .eq('read_by_admin', false)
+        setLoadingMessages(false)
+    }
 
+    async function sendAdminReply(userId, userEmail, userName) {
+        if (!replyText.trim()) return
+        setSendingReply(true)
+        const existingConv = userMessages[0]
+        await supabase.from('contact_messages').insert({
+            user_id: userId,
+            user_name: 'Niyama Admin',
+            email: 'admin@niyama.app',
+            message: replyText.trim(),
+            sender: 'admin',
+            read_by_admin: true,
+            conversation_id: existingConv?.conversation_id,
+        })
+
+        // Send email notification to user via Resend
+        try {
+            await fetch('https://api.resend.com/emails', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${import.meta.env.VITE_RESEND_API_KEY}`,
+                },
+                body: JSON.stringify({
+                    from: 'onboarding@resend.dev',
+                    to: userEmail,
+                    reply_to: 'info.niyamahealth@gmail.com',
+                    subject: 'You have a reply from the Niyama team',
+                    html: `
+            <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px;">
+              <h2 style="color: #5A8A78; margin-bottom: 8px;">Niyama</h2>
+              <p style="color: #1A1A1A; font-size: 16px;">Hi ${userName || 'there'},</p>
+              <p style="color: #6B7280; font-size: 15px; line-height: 1.6;">
+                The Niyama team has replied to your message. Open the app to read it and continue the conversation.
+              </p>
+              <div style="margin: 24px 0; padding: 16px; background: #F4F7F5; border-radius: 12px; border-left: 4px solid #5A8A78;">
+                <p style="color: #6B7280; font-size: 13px; margin: 0;">Open Settings → Contact Us in the Niyama app to read the full reply.</p>
+              </div>
+              <p style="color: #9CA3AF; font-size: 13px;">— The Niyama Team</p>
+            </div>
+          `,
+                }),
+            })
+        } catch (e) {
+            console.log('Email notification failed:', e)
+        }
+
+        setReplyText('')
+        await fetchUserMessages(userId)
+        setSendingReply(false)
+        fetchData()
+    }
+
+    async function resolveConversation(userId) {
+        if (!window.confirm('Mark this conversation as resolved? The user\'s chat will clear after 24 hours.')) return
+        setResolvingConversation(true)
+        await supabase
+            .from('contact_messages')
+            .update({ resolved: true, resolved_at: new Date().toISOString(), resolved_by: 'admin' })
+            .eq('user_id', userId)
+        await fetchUserMessages(userId)
+        setResolvingConversation(false)
+        setMessage('Conversation marked as resolved')
+        fetchData()
+    }
     async function saveNote(userId) {
         if (!newNote.trim()) return
         setSavingNote(true)
@@ -690,6 +790,68 @@ export default function Admin() {
                     )}
                 </Section>
 
+                {/* Messages */}
+                <Section title="Messages">
+                    {loadingMessages ? (
+                        <p style={{ fontSize: '13px', color: s.muted }}>Loading messages...</p>
+                    ) : userMessages.length === 0 ? (
+                        <p style={{ fontSize: '13px', color: s.muted, fontStyle: 'italic' }}>No messages from this user yet</p>
+                    ) : (
+                        <div>
+                            {/* Conversation status */}
+                            {userMessages[0]?.resolved && (
+                                <div style={{ background: '#1a3a1a', border: '1px solid #166534', borderRadius: '8px', padding: '8px 12px', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span style={{ fontSize: '12px', color: '#86efac' }}>✓ Resolved on {new Date(userMessages[0].resolved_at).toLocaleDateString()}</span>
+                                    <span style={{ fontSize: '11px', color: '#4ade80' }}>Chat clears for user in 24hrs</span>
+                                </div>
+                            )}
+
+                            {/* Message thread */}
+                            <div style={{ background: '#333', borderRadius: '10px', padding: '12px', marginBottom: '12px', maxHeight: '300px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {userMessages.map((msg, i) => {
+                                    const isAdmin = msg.sender === 'admin'
+                                    return (
+                                        <div key={msg.id || i} style={{ display: 'flex', justifyContent: isAdmin ? 'flex-end' : 'flex-start' }}>
+                                            <div style={{ maxWidth: '80%' }}>
+                                                <div style={{ padding: '8px 12px', borderRadius: isAdmin ? '12px 12px 4px 12px' : '12px 12px 12px 4px', fontSize: '13px', lineHeight: '1.5', background: isAdmin ? s.primary : '#444', color: 'white' }}>
+                                                    {msg.message}
+                                                </div>
+                                                <p style={{ fontSize: '10px', color: s.dim, marginTop: '2px', textAlign: isAdmin ? 'right' : 'left' }}>
+                                                    {isAdmin ? 'You · ' : `${user.full_name || 'User'} · `}
+                                                    {new Date(msg.created_at).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+
+                            {/* Reply box — only if not resolved */}
+                            {!userMessages[0]?.resolved && (
+                                <div style={{ marginBottom: '10px' }}>
+                                    <textarea placeholder="Type your reply..." value={replyText}
+                                        onChange={e => setReplyText(e.target.value)}
+                                        style={{ ...inputStyle, minHeight: '70px', resize: 'vertical', marginBottom: '8px' }} />
+                                    <button onClick={() => sendAdminReply(user.id, user.email, user.full_name)}
+                                        disabled={!replyText.trim() || sendingReply}
+                                        style={{ ...btn(s.primary), opacity: (!replyText.trim() || sendingReply) ? 0.5 : 1 }}>
+                                        {sendingReply ? 'Sending...' : 'Send reply'}
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* Resolve button — only if not resolved */}
+                            {!userMessages[0]?.resolved && (
+                                <button onClick={() => resolveConversation(user.id)}
+                                    disabled={resolvingConversation}
+                                    style={{ ...btn('#166534', '#86efac'), width: '100%', padding: '10px', opacity: resolvingConversation ? 0.5 : 1 }}>
+                                    {resolvingConversation ? 'Resolving...' : '✓ Mark as resolved'}
+                                </button>
+                            )}
+                        </div>
+                    )}
+                </Section>
+
                 {/* Notes */}
                 <Section title="Admin notes">
                     <div style={{ marginBottom: '12px' }}>
@@ -731,6 +893,12 @@ export default function Admin() {
                     <p style={{ fontSize: '12px', color: s.muted, marginTop: '2px' }}>{totalUsers} users total</p>
                 </div>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    {unreadCount > 0 && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#450a0a', borderRadius: '20px', padding: '4px 12px' }}>
+                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: s.danger }} />
+                            <span style={{ fontSize: '12px', color: '#fca5a5', fontWeight: '600' }}>{unreadCount} unread {unreadCount === 1 ? 'message' : 'messages'}</span>
+                        </div>
+                    )}
                     <button onClick={fetchData} style={{ ...btn('#333', s.muted) }}>Refresh</button>
                     <button onClick={async () => { if (window.confirm('Sign out?')) await supabase.auth.signOut() }}
                         style={{ ...btn('#450a0a', '#fca5a5') }}>Sign out</button>
@@ -742,6 +910,7 @@ export default function Admin() {
                 {[
                     { key: 'dashboard', label: '📊 Dashboard' },
                     { key: 'users', label: '👥 Users' },
+                    { key: 'messages', label: unreadCount > 0 ? `💬 Messages (${unreadCount})` : '💬 Messages' },
                 ].map(tab => (
                     <button key={tab.key} onClick={() => setActiveTab(tab.key)}
                         style={{ padding: '14px 20px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: activeTab === tab.key ? '600' : '400', color: activeTab === tab.key ? s.primary : s.muted, borderBottom: activeTab === tab.key ? `2px solid ${s.primary}` : '2px solid transparent' }}>
@@ -763,18 +932,18 @@ export default function Admin() {
                     <div>
 
                         {/* Key numbers */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '20px' }}>
-                            {[
-                                { label: 'Total users', value: totalUsers, color: s.text },
-                                { label: 'Active today', value: activeToday, color: s.success },
-                                { label: 'Active this month', value: activeThisMonth, color: s.success },
-                                { label: 'New this month', value: newThisMonth, color: s.info },
-                            ].map(stat => (
-                                <div key={stat.label} style={{ background: s.card, border: `1px solid ${s.cardBorder}`, borderRadius: '12px', padding: '16px', textAlign: 'center' }}>
-                                    <p style={{ fontSize: '11px', color: s.muted, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</p>
-                                    <p style={{ fontSize: '32px', fontWeight: '700', color: stat.color }}>{stat.value}</p>
-                                </div>
-                            ))}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px', marginBottom: '20px' }}>                            {[
+                            { label: 'Total users', value: totalUsers, color: s.text },
+                            { label: 'Active today', value: activeToday, color: s.success },
+                            { label: 'Active this month', value: activeThisMonth, color: s.success },
+                            { label: 'New this month', value: newThisMonth, color: s.info },
+                            { label: 'Unread messages', value: unreadCount, color: unreadCount > 0 ? s.danger : s.muted },
+                        ].map(stat => (
+                            <div key={stat.label} style={{ background: s.card, border: `1px solid ${s.cardBorder}`, borderRadius: '12px', padding: '16px', textAlign: 'center' }}>
+                                <p style={{ fontSize: '11px', color: s.muted, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</p>
+                                <p style={{ fontSize: '32px', fontWeight: '700', color: stat.color }}>{stat.value}</p>
+                            </div>
+                        ))}
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
@@ -1138,7 +1307,9 @@ export default function Admin() {
                                                     if (exportMode) {
                                                         setExportSelectedUsers(prev => prev.includes(user.id) ? prev.filter(id => id !== user.id) : [...prev, user.id])
                                                     } else {
-                                                        setSelectedUser(user); await fetchAdminNotes(user.id)
+                                                        setSelectedUser(user)
+                                                        await fetchAdminNotes(user.id)
+                                                        await fetchUserMessages(user.id)
                                                     }
                                                 }}
                                                 style={{ display: 'grid', gridTemplateColumns: exportMode ? '40px 40px 1fr 80px 60px 80px 100px 100px 100px' : '40px 1fr 80px 60px 80px 100px 100px 100px', gap: '0', padding: '14px 16px', borderBottom: `1px solid ${s.cardBorder}`, cursor: 'pointer', background: exportSelectedUsers.includes(user.id) ? '#1e3a2f' : fraud ? '#1a0a0a' : 'transparent', transition: 'background 0.15s' }}
@@ -1152,7 +1323,12 @@ export default function Admin() {
                                                 )}
                                                 <p style={{ fontSize: '13px', color: s.muted }}>{index + 1}</p>
                                                 <div>
-                                                    <p style={{ fontSize: '13px', fontWeight: '500' }}>{user.full_name || 'No name'}</p>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                        <p style={{ fontSize: '13px', fontWeight: '500' }}>{user.full_name || 'No name'}</p>
+                                                        {userMessages.some(m => m.user_id === user.id && !m.read_by_admin && m.sender === 'user') && (
+                                                            <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: s.danger, flexShrink: 0 }} />
+                                                        )}
+                                                    </div>
                                                     <p style={{ fontSize: '11px', color: s.muted }}>{user.email || ''}</p>
                                                     {fraud && <span style={{ fontSize: '10px', color: '#fca5a5' }}>⚠️ Fraud flag</span>}
                                                 </div>
@@ -1166,6 +1342,55 @@ export default function Admin() {
                                         )
                                     })
                                 )}
+                            </div>
+                        )}
+                        {/* ─── MESSAGES TAB ──────────────────────────────────────────────────── */}
+                        {activeTab === 'messages' && (
+                            <div>
+                                {unreadCount === 0 && (
+                                    <div style={{ textAlign: 'center', padding: '48px 24px' }}>
+                                        <p style={{ fontSize: '32px', marginBottom: '12px' }}>💬</p>
+                                        <p style={{ fontSize: '16px', fontWeight: '600', color: s.text, marginBottom: '6px' }}>No unread messages</p>
+                                        <p style={{ fontSize: '14px', color: s.muted }}>All conversations are up to date</p>
+                                    </div>
+                                )}
+                                {users.filter(u => {
+                                    const msgs = userMessages.filter(m => m.user_id === u.id)
+                                    return msgs.some(m => !m.read_by_admin && m.sender === 'user')
+                                }).length === 0 && unreadCount > 0 && (
+                                        <p style={{ color: s.muted, fontSize: '14px' }}>Loading conversations...</p>
+                                    )}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                    {users.map(user => {
+                                        const hasUnread = userMessages.some(m => m.user_id === user.id && !m.read_by_admin && m.sender === 'user')
+                                        const lastMessage = userMessages.filter(m => m.user_id === user.id).sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0]
+                                        if (!lastMessage) return null
+                                        return (
+                                            <div key={user.id}
+                                                onClick={async () => { setSelectedUser(user); await fetchAdminNotes(user.id); await fetchUserMessages(user.id); setActiveTab('users') }}
+                                                style={{ background: s.card, border: `1px solid ${hasUnread ? s.danger : s.cardBorder}`, borderRadius: '12px', padding: '16px', cursor: 'pointer', display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+                                                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: hasUnread ? '#450a0a' : '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', fontWeight: '700', color: hasUnread ? '#fca5a5' : s.muted, flexShrink: 0 }}>
+                                                    {user.full_name?.charAt(0).toUpperCase() || '?'}
+                                                </div>
+                                                <div style={{ flex: 1, minWidth: 0 }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                                                        <p style={{ fontSize: '14px', fontWeight: '600', color: s.text }}>{user.full_name || 'Unknown'}</p>
+                                                        <p style={{ fontSize: '11px', color: s.muted }}>{new Date(lastMessage.created_at).toLocaleDateString()}</p>
+                                                    </div>
+                                                    <p style={{ fontSize: '13px', color: hasUnread ? '#fca5a5' : s.muted, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                        {lastMessage.sender === 'admin' ? 'You: ' : ''}{lastMessage.message}
+                                                    </p>
+                                                    {lastMessage.resolved && (
+                                                        <span style={{ fontSize: '11px', color: '#86efac', marginTop: '4px', display: 'inline-block' }}>✓ Resolved</span>
+                                                    )}
+                                                </div>
+                                                {hasUnread && (
+                                                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: s.danger, flexShrink: 0, marginTop: '4px' }} />
+                                                )}
+                                            </div>
+                                        )
+                                    }).filter(Boolean)}
+                                </div>
                             </div>
                         )}
                     </div>
