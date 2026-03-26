@@ -893,12 +893,6 @@ export default function Admin() {
                     <p style={{ fontSize: '12px', color: s.muted, marginTop: '2px' }}>{totalUsers} users total</p>
                 </div>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    {unreadCount > 0 && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#450a0a', borderRadius: '20px', padding: '4px 12px' }}>
-                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: s.danger }} />
-                            <span style={{ fontSize: '12px', color: '#fca5a5', fontWeight: '600' }}>{unreadCount} unread {unreadCount === 1 ? 'message' : 'messages'}</span>
-                        </div>
-                    )}
                     <button onClick={fetchData} style={{ ...btn('#333', s.muted) }}>Refresh</button>
                     <button onClick={async () => { if (window.confirm('Sign out?')) await supabase.auth.signOut() }}
                         style={{ ...btn('#450a0a', '#fca5a5') }}>Sign out</button>
@@ -932,12 +926,11 @@ export default function Admin() {
                     <div>
 
                         {/* Key numbers */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px', marginBottom: '20px' }}>                            {[
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '20px' }}>                            {[
                             { label: 'Total users', value: totalUsers, color: s.text },
                             { label: 'Active today', value: activeToday, color: s.success },
                             { label: 'Active this month', value: activeThisMonth, color: s.success },
                             { label: 'New this month', value: newThisMonth, color: s.info },
-                            { label: 'Unread messages', value: unreadCount, color: unreadCount > 0 ? s.danger : s.muted },
                         ].map(stat => (
                             <div key={stat.label} style={{ background: s.card, border: `1px solid ${s.cardBorder}`, borderRadius: '12px', padding: '16px', textAlign: 'center' }}>
                                 <p style={{ fontSize: '11px', color: s.muted, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</p>
