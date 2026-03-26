@@ -30,6 +30,7 @@ export default function Settings({ profile, session, onSignOut }) {
     }
 
     const menuItems = [
+        { key: 'getting-started', label: 'Getting started', icon: '🚀' },
         { key: 'founder', label: "Founder's story", icon: '✨' },
         { key: 'about', label: 'About Niyama', icon: '📖' },
         { key: 'rules', label: 'Rules and points system', icon: '📜' },
@@ -48,7 +49,113 @@ export default function Settings({ profile, session, onSignOut }) {
     const card = { background: 'var(--theme-card)', border: '1px solid var(--theme-border)', borderRadius: '16px', padding: '24px', marginBottom: '16px' }
     const cardTitle = { fontWeight: '600', color: 'var(--theme-text)', marginBottom: '16px' }
     const bodyText = { fontSize: '14px', color: 'var(--theme-text-secondary)', lineHeight: '1.7' }
+    if (activePage === 'getting-started') {
+        return (
+            <div style={pageStyle}>
+                <button style={backBtn} onClick={() => setActivePage(null)}>← Back</button>
+                <h2 style={{ fontSize: '22px', fontWeight: '700', color: 'var(--theme-text)', marginBottom: '6px' }}>Getting started</h2>
+                <p style={{ fontSize: '14px', color: 'var(--theme-text-secondary)', marginBottom: '24px' }}>Everything you need to know to get the most out of Niyama.</p>
 
+                <div style={{ background: 'var(--theme-primary)', borderRadius: '16px', padding: '20px', marginBottom: '16px', color: 'white' }}>
+                    <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '8px' }}>Welcome to Niyama 🌿</h3>
+                    <p style={{ fontSize: '13px', opacity: '0.9', lineHeight: '1.6' }}>
+                        Niyama rewards you for building 4 simple daily habits. The more consistent you are, the more you earn. Here's how to get started.
+                    </p>
+                </div>
+
+                <div style={card}>
+                    <h3 style={cardTitle}>Step 1 — Log your habits daily</h3>
+                    <p style={{ ...bodyText, marginBottom: '16px' }}>Every day check off the habits you completed on the Home tab. You can save a draft during the day and submit when you're done.</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {[
+                            { emoji: '🌅', habit: 'Wake before 7:30 AM', tip: 'Check this first thing when you wake up' },
+                            { emoji: '👟', habit: 'Steps 10,000 or more', tip: 'Check this in the evening once you\'ve hit your step goal' },
+                            { emoji: '📵', habit: 'Screen time under 2 hrs', tip: 'Check this once your screen time is under 2 hours' },
+                            { emoji: '🌙', habit: 'Sleep by 10:30 PM', tip: 'Check this before you wind down for the night' },
+                        ].map(item => (
+                            <div key={item.habit} style={{ display: 'flex', gap: '12px', padding: '10px', background: 'var(--theme-bg)', borderRadius: '10px' }}>
+                                <span style={{ fontSize: '18px', flexShrink: '0' }}>{item.emoji}</span>
+                                <div>
+                                    <p style={{ fontSize: '13px', fontWeight: '500', color: 'var(--theme-text)', marginBottom: '2px' }}>{item.habit}</p>
+                                    <p style={{ fontSize: '12px', color: 'var(--theme-text-secondary)' }}>{item.tip}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div style={card}>
+                    <h3 style={cardTitle}>Step 2 — Understand your points</h3>
+                    <p style={{ ...bodyText, marginBottom: '12px' }}>Every day you start with 250 base points. Complete habits to earn more, miss them to lose some.</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {[
+                            { label: 'Perfect day (all 4 habits)', value: '750 pts', color: 'var(--theme-primary)' },
+                            { label: 'Complete all 4 bonus', value: '+100 pts', color: 'var(--theme-primary)' },
+                            { label: '1,000 points equals', value: '$1.00', color: 'var(--theme-primary)' },
+                            { label: 'Max monthly value', value: '$22.50', color: 'var(--theme-primary)' },
+                        ].map(item => (
+                            <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: '13px', color: 'var(--theme-text-secondary)' }}>{item.label}</span>
+                                <span style={{ fontSize: '13px', fontWeight: '600', color: item.color }}>{item.value}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div style={card}>
+                    <h3 style={cardTitle}>Step 3 — Earn your reward</h3>
+                    <p style={{ ...bodyText, marginBottom: '12px' }}>To qualify for a reward each month you need to:</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {[
+                            { icon: '✓', text: 'Complete at least 7 successful days — where all 4 habits are done', color: 'var(--theme-primary)' },
+                            { icon: '✓', text: 'Avoid being inactive for 5 or more consecutive days', color: 'var(--theme-primary)' },
+                            { icon: '✓', text: 'Your reward is paid out on the 1st of the following month', color: 'var(--theme-primary)' },
+                        ].map((item, i) => (
+                            <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                                <span style={{ fontWeight: '700', color: item.color, flexShrink: '0', fontSize: '14px' }}>{item.icon}</span>
+                                <p style={{ fontSize: '13px', color: 'var(--theme-text-secondary)', lineHeight: '1.6' }}>{item.text}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div style={card}>
+                    <h3 style={cardTitle}>Step 4 — Build your streak</h3>
+                    <p style={{ ...bodyText, marginBottom: '12px' }}>A streak is the number of consecutive days where all 4 habits are completed. The longer your streak the bigger the flame.</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {[
+                            { streak: '3+ days', message: '💪 You\'re building momentum' },
+                            { streak: '10+ days', message: '🌟 You\'re on fire' },
+                            { streak: '25 days (Premium)', message: '🏆 $25 bonus reward unlocked' },
+                        ].map(item => (
+                            <div key={item.streak} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px', background: 'var(--theme-bg)', borderRadius: '8px' }}>
+                                <span style={{ fontSize: '13px', fontWeight: '500', color: 'var(--theme-text)' }}>{item.streak}</span>
+                                <span style={{ fontSize: '12px', color: 'var(--theme-text-secondary)' }}>{item.message}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div style={card}>
+                    <h3 style={cardTitle}>Tips for success</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {[
+                            'Submit your habits before midnight every day — they auto-submit at midnight but it\'s better to do it yourself.',
+                            'Even if you miss all 4 habits, still submit your results so your streak and inactive day count stay accurate.',
+                            'Check the Analytics tab regularly to see your progress and identify which habits you struggle with most.',
+                            'The honor system depends on your integrity — log honestly, not for Niyama but for yourself.',
+                        ].map((tip, i) => (
+                            <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                                <span style={{ fontWeight: '700', color: 'var(--theme-secondary)', flexShrink: '0' }}>{i + 1}.</span>
+                                <p style={{ fontSize: '13px', color: 'var(--theme-text-secondary)', lineHeight: '1.6' }}>{tip}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+            </div>
+        )
+    }
     if (activePage === 'founder') {
         return (
             <div style={pageStyle}>

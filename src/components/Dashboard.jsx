@@ -243,7 +243,7 @@ export default function Dashboard({ session }) {
     const isInactive = (profile?.consecutive_inactive_days || 0) >= 5
     const isEligible = successfulDays >= 7 && !isInactive
     const noneSelected = !Object.values(habits).some(v => v === true)
-
+    const isFirstTimeUser = profile?.total_days_logged === 0 && !todayHabits?.submitted
     const tierLabel = profile?.tier ? profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1) : 'Free'
 
     const NavIcon = ({ tab }) => {
@@ -274,97 +274,128 @@ export default function Dashboard({ session }) {
 
                 {activeTab === 'home' && (
                     <>
-                        {/* Streak Banner */}
-                        <div style={{ background: 'var(--theme-primary)', borderRadius: '16px', padding: '20px', marginBottom: '16px', color: 'white' }}>
+                        {/* Empty state for new users */}
+                        {isFirstTimeUser && (
+                            <div style={{ background: 'var(--theme-primary)', borderRadius: '16px', padding: '24px', marginBottom: '16px', color: 'white' }}>
+                                <p style={{ fontSize: '22px', marginBottom: '8px' }}>👋</p>
+                                <h2 style={{ fontSize: '20px', fontWeight: '700', marginBottom: '8px' }}>
+                                    Welcome, {profile?.full_name?.split(' ')[0] || 'there'}!
+                                </h2>
+                                <p style={{ fontSize: '14px', opacity: '0.9', lineHeight: '1.6', marginBottom: '16px' }}>
+                                    You're all set up. Today is day one of your Niyama journey. Start by checking off the habits you've completed below and submit your results before midnight.
+                                </p>
+                                <div style={{ background: 'rgba(255,255,255,0.15)', borderRadius: '10px', padding: '12px' }}>
+                                    <p style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px' }}>Your first day checklist:</p>
+                                    {[
+                                        'Check off each habit you completed today',
+                                        'Tap "Submit today" before midnight',
+                                        'Come back tomorrow and do it again',
+                                    ].map((step, i) => (
+                                        <div key={i} style={{ display: 'flex', gap: '10px', marginBottom: i < 2 ? '6px' : '0' }}>
+                                            <span style={{ opacity: '0.8', fontSize: '13px' }}>{i + 1}.</span>
+                                            <p style={{ fontSize: '13px', opacity: '0.9' }}>{step}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                                <p style={{ fontSize: '12px', opacity: '0.7', marginTop: '12px', textAlign: 'center' }}>
+                                    Need help? Go to Settings → Getting started
+                                </p>
+                            </div>
+                        )}
 
-                            {/* Flame and streak count */}
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <span style={{
-                                        fontSize: streak?.current_streak >= 25 ? '48px' : streak?.current_streak >= 10 ? '40px' : streak?.current_streak >= 5 ? '34px' : '28px',
-                                        animation: streak?.current_streak > 0 ? 'flame-pulse 1.5s ease-in-out infinite' : 'none',
-                                        display: 'block',
-                                        lineHeight: 1,
-                                    }}>
-                                        🔥
-                                    </span>
-                                    <div>
-                                        <p style={{ fontSize: '13px', opacity: '0.8', marginBottom: '2px' }}>Current streak</p>
-                                        <p style={{ fontSize: '32px', fontWeight: '700', lineHeight: 1 }}>{streak?.current_streak || 0} <span style={{ fontSize: '16px', opacity: '0.8' }}>days</span></p>
+                        {/* Streak Banner — hidden for first time users */}
+                        {!isFirstTimeUser && (
+                            <div style={{ background: 'var(--theme-primary)', borderRadius: '16px', padding: '20px', marginBottom: '16px', color: 'white' }}>
+
+                                {/* Flame and streak count */}
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <span style={{
+                                            fontSize: streak?.current_streak >= 25 ? '48px' : streak?.current_streak >= 10 ? '40px' : streak?.current_streak >= 5 ? '34px' : '28px',
+                                            animation: streak?.current_streak > 0 ? 'flame-pulse 1.5s ease-in-out infinite' : 'none',
+                                            display: 'block',
+                                            lineHeight: 1,
+                                        }}>
+                                            🔥
+                                        </span>
+                                        <div>
+                                            <p style={{ fontSize: '13px', opacity: '0.8', marginBottom: '2px' }}>Current streak</p>
+                                            <p style={{ fontSize: '32px', fontWeight: '700', lineHeight: 1 }}>{streak?.current_streak || 0} <span style={{ fontSize: '16px', opacity: '0.8' }}>days</span></p>
+                                        </div>
+                                    </div>
+                                    {profile?.tier === 'premium' && (
+                                        <div style={{ textAlign: 'right' }}>
+                                            <p style={{ fontSize: '12px', opacity: '0.8' }}>25 day goal</p>
+                                            <p style={{ fontSize: '14px', marginTop: '4px', fontWeight: '600' }}>{streak?.current_streak || 0}/25</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Last 7 days dots */}
+                                <div style={{ marginBottom: profile?.tier === 'premium' ? '12px' : '0' }}>
+                                    <p style={{ fontSize: '11px', opacity: '0.7', marginBottom: '8px' }}>Last 7 days</p>
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                        {Array.from({ length: 7 }, (_, i) => {
+                                            const dayOffset = 6 - i
+                                            const isToday = dayOffset === 0
+                                            const streakCount = streak?.current_streak || 0
+                                            const wasSuccess = dayOffset < streakCount
+                                            const isPast = !isToday
+
+                                            return (
+                                                <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                                                    <div style={{
+                                                        width: '100%',
+                                                        aspectRatio: '1',
+                                                        borderRadius: '50%',
+                                                        background: isToday
+                                                            ? allFourChecked ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.3)'
+                                                            : wasSuccess ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.2)',
+                                                        border: isToday ? '2px solid rgba(255,255,255,0.8)' : 'none',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        animation: wasSuccess || (isToday && allFourChecked) ? `dot-pop 0.3s ease-out ${i * 0.05}s both` : 'none',
+                                                    }}>
+                                                        {(wasSuccess || (isToday && allFourChecked)) && (
+                                                            <span style={{ fontSize: '10px' }}>✓</span>
+                                                        )}
+                                                    </div>
+                                                    <p style={{ fontSize: '9px', opacity: '0.7', textAlign: 'center' }}>
+                                                        {isToday ? 'Today' : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][(new Date().getDay() + 6 - dayOffset) % 7]}
+                                                    </p>
+                                                </div>
+                                            )
+                                        })}
                                     </div>
                                 </div>
+
+                                {/* Premium 25 day progress bar */}
                                 {profile?.tier === 'premium' && (
-                                    <div style={{ textAlign: 'right' }}>
-                                        <p style={{ fontSize: '12px', opacity: '0.8' }}>25 day goal</p>
-                                        <p style={{ fontSize: '14px', marginTop: '4px', fontWeight: '600' }}>{streak?.current_streak || 0}/25</p>
+                                    <div style={{ background: 'rgba(255,255,255,0.25)', borderRadius: '4px', height: '6px' }}>
+                                        <div style={{ background: 'white', borderRadius: '4px', height: '6px', width: `${Math.min((streak?.current_streak || 0) / 25 * 100, 100)}%`, transition: 'width 0.5s ease' }} />
                                     </div>
                                 )}
+
+                                {/* Streak milestone messages */}
+                                {streak?.current_streak >= 25 && profile?.tier === 'premium' && (
+                                    <div style={{ marginTop: '10px', background: 'rgba(255,255,255,0.2)', borderRadius: '8px', padding: '8px', textAlign: 'center' }}>
+                                        <p style={{ fontSize: '13px', fontWeight: '600' }}>🏆 25-day streak achieved! $25 bonus unlocked!</p>
+                                    </div>
+                                )}
+                                {streak?.current_streak >= 10 && streak?.current_streak < 25 && (
+                                    <div style={{ marginTop: '10px', background: 'rgba(255,255,255,0.15)', borderRadius: '8px', padding: '8px', textAlign: 'center' }}>
+                                        <p style={{ fontSize: '12px', opacity: '0.9' }}>🌟 {streak?.current_streak} day streak! You're on fire!</p>
+                                    </div>
+                                )}
+                                {streak?.current_streak >= 3 && streak?.current_streak < 10 && (
+                                    <div style={{ marginTop: '10px', background: 'rgba(255,255,255,0.15)', borderRadius: '8px', padding: '8px', textAlign: 'center' }}>
+                                        <p style={{ fontSize: '12px', opacity: '0.9' }}>💪 {streak?.current_streak} days strong! Keep going!</p>
+                                    </div>
+                                )}
+
                             </div>
-
-                            {/* Last 7 days dots */}
-                            <div style={{ marginBottom: profile?.tier === 'premium' ? '12px' : '0' }}>
-                                <p style={{ fontSize: '11px', opacity: '0.7', marginBottom: '8px' }}>Last 7 days</p>
-                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                    {Array.from({ length: 7 }, (_, i) => {
-                                        const dayOffset = 6 - i
-                                        const isToday = dayOffset === 0
-                                        const streakCount = streak?.current_streak || 0
-                                        const wasSuccess = dayOffset < streakCount
-                                        const isPast = !isToday
-
-                                        return (
-                                            <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                                                <div style={{
-                                                    width: '100%',
-                                                    aspectRatio: '1',
-                                                    borderRadius: '50%',
-                                                    background: isToday
-                                                        ? allFourChecked ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.3)'
-                                                        : wasSuccess ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.2)',
-                                                    border: isToday ? '2px solid rgba(255,255,255,0.8)' : 'none',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    animation: wasSuccess || (isToday && allFourChecked) ? `dot-pop 0.3s ease-out ${i * 0.05}s both` : 'none',
-                                                }}>
-                                                    {(wasSuccess || (isToday && allFourChecked)) && (
-                                                        <span style={{ fontSize: '10px' }}>✓</span>
-                                                    )}
-                                                </div>
-                                                <p style={{ fontSize: '9px', opacity: '0.7', textAlign: 'center' }}>
-                                                    {isToday ? 'Today' : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][(new Date().getDay() + 6 - dayOffset) % 7]}
-                                                </p>
-                                            </div>
-                                        )
-                                    })}
-                                </div>
-                            </div>
-
-                            {/* Premium 25 day progress bar */}
-                            {profile?.tier === 'premium' && (
-                                <div style={{ background: 'rgba(255,255,255,0.25)', borderRadius: '4px', height: '6px' }}>
-                                    <div style={{ background: 'white', borderRadius: '4px', height: '6px', width: `${Math.min((streak?.current_streak || 0) / 25 * 100, 100)}%`, transition: 'width 0.5s ease' }} />
-                                </div>
-                            )}
-
-                            {/* Streak milestone messages */}
-                            {streak?.current_streak >= 25 && profile?.tier === 'premium' && (
-                                <div style={{ marginTop: '10px', background: 'rgba(255,255,255,0.2)', borderRadius: '8px', padding: '8px', textAlign: 'center' }}>
-                                    <p style={{ fontSize: '13px', fontWeight: '600' }}>🏆 25-day streak achieved! $25 bonus unlocked!</p>
-                                </div>
-                            )}
-                            {streak?.current_streak >= 10 && streak?.current_streak < 25 && (
-                                <div style={{ marginTop: '10px', background: 'rgba(255,255,255,0.15)', borderRadius: '8px', padding: '8px', textAlign: 'center' }}>
-                                    <p style={{ fontSize: '12px', opacity: '0.9' }}>🌟 {streak?.current_streak} day streak! You're on fire!</p>
-                                </div>
-                            )}
-                            {streak?.current_streak >= 3 && streak?.current_streak < 10 && (
-                                <div style={{ marginTop: '10px', background: 'rgba(255,255,255,0.15)', borderRadius: '8px', padding: '8px', textAlign: 'center' }}>
-                                    <p style={{ fontSize: '12px', opacity: '0.9' }}>💪 {streak?.current_streak} days strong! Keep going!</p>
-                                </div>
-                            )}
-
-                        </div>
+                        )}
 
                         {/* Reward eligibility */}
                         <div style={{ background: 'var(--theme-card)', border: '1px solid var(--theme-border)', borderRadius: '16px', padding: '16px', marginBottom: '16px' }}>
@@ -478,18 +509,36 @@ export default function Dashboard({ session }) {
 
                         {/* Stats grid */}
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
-                            {[
-                                { label: 'Monthly points', value: profile?.monthly_points || 0, sub: 'max 22,500' },
-                                { label: 'Successful days', value: successfulDays, sub: 'this month' },
-                                { label: 'Overall successful', value: profile?.overall_successful_days || 0, sub: 'all time' },
-                                { label: 'Days logged', value: profile?.total_days_logged || 0, sub: 'all time' },
-                            ].map(stat => (
-                                <div key={stat.label} style={{ background: 'var(--theme-card)', border: '1px solid var(--theme-border)', borderRadius: '16px', padding: '16px' }}>
-                                    <p style={{ fontSize: '12px', color: 'var(--theme-text-secondary)', marginBottom: '4px' }}>{stat.label}</p>
-                                    <p style={{ fontSize: '26px', fontWeight: '700', color: 'var(--theme-text)' }}>{stat.value}</p>
-                                    <p style={{ fontSize: '11px', color: 'var(--theme-text-muted)', marginTop: '2px' }}>{stat.sub}</p>
-                                </div>
-                            ))}
+                            {isFirstTimeUser ? (
+                                <>
+                                    {[
+                                        { label: 'Monthly points', empty: 'Submit your first day to start earning points' },
+                                        { label: 'Successful days', empty: 'Complete all 4 habits for a successful day' },
+                                        { label: 'Overall successful', empty: 'Your all-time record will appear here' },
+                                        { label: 'Days logged', empty: 'Each day you submit will be counted here' },
+                                    ].map(stat => (
+                                        <div key={stat.label} style={{ background: 'var(--theme-card)', border: '1px solid var(--theme-border)', borderRadius: '16px', padding: '16px' }}>
+                                            <p style={{ fontSize: '12px', color: 'var(--theme-text-secondary)', marginBottom: '8px' }}>{stat.label}</p>
+                                            <p style={{ fontSize: '12px', color: 'var(--theme-text-muted)', lineHeight: '1.5', fontStyle: 'italic' }}>{stat.empty}</p>
+                                        </div>
+                                    ))}
+                                </>
+                            ) : (
+                                <>
+                                    {[
+                                        { label: 'Monthly points', value: profile?.monthly_points || 0, sub: 'max 22,500' },
+                                        { label: 'Successful days', value: successfulDays, sub: 'this month' },
+                                        { label: 'Overall successful', value: profile?.overall_successful_days || 0, sub: 'all time' },
+                                        { label: 'Days logged', value: profile?.total_days_logged || 0, sub: 'all time' },
+                                    ].map(stat => (
+                                        <div key={stat.label} style={{ background: 'var(--theme-card)', border: '1px solid var(--theme-border)', borderRadius: '16px', padding: '16px' }}>
+                                            <p style={{ fontSize: '12px', color: 'var(--theme-text-secondary)', marginBottom: '4px' }}>{stat.label}</p>
+                                            <p style={{ fontSize: '26px', fontWeight: '700', color: 'var(--theme-text)' }}>{stat.value}</p>
+                                            <p style={{ fontSize: '11px', color: 'var(--theme-text-muted)', marginTop: '2px' }}>{stat.sub}</p>
+                                        </div>
+                                    ))}
+                                </>
+                            )}
                         </div>
 
                         {/* Rewards summary */}
