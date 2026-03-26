@@ -651,7 +651,6 @@ export default function Dashboard({ session }) {
                         { key: 'settings', label: 'Settings' },
                     ].map(tab => (
                         <button key={tab.key} onClick={() => { setActiveTab(tab.key); trackEvent('page_visit', { page: tab.key }) }}
-                            onClick={() => { setActiveTab(tab.key); trackEvent('page_visit', { page: tab.key }) }}
                             style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', padding: '4px 16px', background: 'none', border: 'none', cursor: 'pointer', color: activeTab === tab.key ? 'var(--theme-primary)' : 'var(--theme-text-muted)' }}>
                             {tab.key === 'settings' ? (
                                 <svg xmlns="http://www.w3.org/2000/svg" style={{ width: '20px', height: '20px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
