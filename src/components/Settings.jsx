@@ -30,9 +30,9 @@ export default function Settings({ profile, session, onSignOut }) {
     }
 
     const menuItems = [
-        { key: 'getting-started', label: 'Getting started', icon: '🚀' },
         { key: 'founder', label: "Founder's story", icon: '✨' },
         { key: 'about', label: 'About Niyama', icon: '📖' },
+        { key: 'getting-started', label: 'Getting started', icon: '🚀' },
         { key: 'rules', label: 'Rules and points system', icon: '📜' },
         { key: 'tiers', label: 'Subscription tiers', icon: '🏆' },
         { key: 'habits', label: 'Habit importance', icon: '💪' },
