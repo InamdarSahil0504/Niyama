@@ -150,37 +150,43 @@ export default function Admin() {
         setSendingMessage(false)
     }
 
-    function exportCSV() {
+    async function exportCSV() {
+        const XLSX = await import('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/xlsx.mjs')
+
         const headers = ['Name', 'Email', 'Gender', 'Age', 'Tier', 'Monthly Points', 'Successful Days', 'Overall Successful Days', 'Total Days Logged', 'Current Streak', 'Longest Streak', 'Consecutive Inactive Days', 'Last Active', 'Joined', 'Is Minor', 'Color Theme']
+
         const rows = users.map(u => {
             const streak = getStreak(u.id)
-            return [
-                u.full_name || '',
-                u.email || '',
-                u.gender || '',
-                u.age || '',
-                u.tier || 'free',
-                u.monthly_points || 0,
-                u.successful_days || 0,
-                u.overall_successful_days || 0,
-                u.total_days_logged || 0,
-                streak?.current_streak || 0,
-                streak?.longest_streak || 0,
-                u.consecutive_inactive_days || 0,
-                u.last_active_date || '',
-                u.created_at ? u.created_at.split('T')[0] : '',
-                u.is_minor ? 'Yes' : 'No',
-                u.color_theme || 'sage',
-            ]
+            return {
+                'Name': u.full_name || '',
+                'Email': u.email || '',
+                'Gender': u.gender || '',
+                'Age': u.age || '',
+                'Tier': u.tier || 'free',
+                'Monthly Points': u.monthly_points || 0,
+                'Successful Days': u.successful_days || 0,
+                'Overall Successful Days': u.overall_successful_days || 0,
+                'Total Days Logged': u.total_days_logged || 0,
+                'Current Streak': streak?.current_streak || 0,
+                'Longest Streak': streak?.longest_streak || 0,
+                'Consecutive Inactive Days': u.consecutive_inactive_days || 0,
+                'Last Active': u.last_active_date || '',
+                'Joined': u.created_at ? u.created_at.split('T')[0] : '',
+                'Is Minor': u.is_minor ? 'Yes' : 'No',
+                'Color Theme': u.color_theme || 'sage',
+                'Est. Reward': calcReward(u),
+            }
         })
-        const csvContent = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n')
-        const blob = new Blob([csvContent], { type: 'text/csv' })
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `niyama-users-${new Date().toISOString().split('T')[0]}.csv`
-        a.click()
-        URL.revokeObjectURL(url)
+
+        const worksheet = XLSX.utils.json_to_sheet(rows)
+        const workbook = XLSX.utils.book_new()
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Users')
+
+        // Auto-width columns
+        const colWidths = headers.map(h => ({ wch: Math.max(h.length, 12) }))
+        worksheet['!cols'] = colWidths
+
+        XLSX.writeFile(workbook, `niyama-users-${new Date().toISOString().split('T')[0]}.xlsx`)
     }
 
     function isFraudSuspect(user) {
@@ -244,7 +250,7 @@ export default function Admin() {
                     </button>
                     <button onClick={exportCSV}
                         style={{ ...btn, background: '#333', color: '#5A8A78' }}>
-                        Export CSV
+                        Export Excel
                     </button>
                     <button onClick={fetchData}
                         style={{ ...btn, background: 'none', color: '#818CF8' }}>
