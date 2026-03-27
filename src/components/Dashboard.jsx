@@ -348,8 +348,7 @@ export default function Dashboard({ session }) {
                     <>
                         {/* Empty state for new users */}
                         {isFirstTimeUser && (
-                            <div style={{ background: 'var(--theme-primary)', borderRadius: '16px', padding: '24px', marginBottom: '16px', color: 'white' }}>
-                                <p style={{ fontSize: '22px', marginBottom: '8px' }}>👋</p>
+                            <div data-tutorial="streak" style={{ background: 'var(--theme-primary)', borderRadius: '16px', padding: '20px', marginBottom: '16px', color: 'white' }}>                                <p style={{ fontSize: '22px', marginBottom: '8px' }}>👋</p>
                                 <h2 style={{ fontSize: '20px', fontWeight: '700', marginBottom: '8px' }}>
                                     Welcome, {profile?.full_name?.split(' ')[0] || 'there'}!
                                 </h2>
@@ -470,7 +469,7 @@ export default function Dashboard({ session }) {
                         )}
 
                         {/* Reward eligibility */}
-                        <div style={{ background: 'var(--theme-card)', border: '1px solid var(--theme-border)', borderRadius: '16px', padding: '16px', marginBottom: '16px' }}>
+                        <div data-tutorial="eligibility" style={{ background: 'var(--theme-card)', border: '1px solid var(--theme-border)', borderRadius: '16px', padding: '16px', marginBottom: '16px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                                 <p style={{ fontSize: '13px', color: 'var(--theme-text-secondary)' }}>Progress to reward eligibility</p>
                                 <p style={{ fontSize: '13px', fontWeight: '600', color: 'var(--theme-primary)' }}>{successfulDays}/7</p>
@@ -489,7 +488,7 @@ export default function Dashboard({ session }) {
                         </div>
 
                         {/* Habits */}
-                        <div style={{ background: 'var(--theme-card)', border: '1px solid var(--theme-border)', borderRadius: '16px', padding: '20px', marginBottom: '16px' }}>
+                        <div data-tutorial="habits" style={{ background: 'var(--theme-card)', border: '1px solid var(--theme-border)', borderRadius: '16px', padding: '20px', marginBottom: '16px' }}>
                             <h2 style={{ fontSize: '17px', fontWeight: '600', color: 'var(--theme-text)', marginBottom: '4px' }}>Today's habits</h2>
                             <p style={{ fontSize: '12px', color: 'var(--theme-text-muted)', marginBottom: '16px' }}>Base: 250 pts · Perfect day: 750 pts</p>
 
@@ -580,7 +579,7 @@ export default function Dashboard({ session }) {
                         </div>
 
                         {/* Stats grid */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+                        <div data-tutorial="stats" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
                             {isFirstTimeUser ? (
                                 <>
                                     {[
@@ -614,7 +613,7 @@ export default function Dashboard({ session }) {
                         </div>
 
                         {/* Rewards summary */}
-                        <div style={{ background: 'var(--theme-card)', border: '1px solid var(--theme-border)', borderRadius: '16px', padding: '20px' }}>
+                        <div data-tutorial="rewards-summary" style={{ background: 'var(--theme-card)', border: '1px solid var(--theme-border)', borderRadius: '16px', padding: '20px' }}>
                             <h2 style={{ fontSize: '17px', fontWeight: '600', color: 'var(--theme-text)', marginBottom: '16px' }}>Rewards</h2>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                 {[
@@ -642,7 +641,7 @@ export default function Dashboard({ session }) {
             </div>
 
             {/* Bottom nav */}
-            <div style={{ position: 'fixed', bottom: '0', left: '0', right: '0', background: 'var(--theme-card)', borderTop: '1px solid var(--theme-border)' }}>
+            <div data-tutorial="bottom-nav" style={{ position: 'fixed', bottom: '0', left: '0', right: '0', background: 'var(--theme-card)', borderTop: '1px solid var(--theme-border)' }}>
                 <div style={{ maxWidth: '448px', margin: '0 auto', display: 'flex', justifyContent: 'space-around', alignItems: 'center', padding: '10px 0 6px' }}>
                     {[
                         { key: 'home', label: 'Home' },
