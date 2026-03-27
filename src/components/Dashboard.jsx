@@ -6,7 +6,6 @@ import Rewards from './Rewards'
 import Settings from './Settings'
 import FounderStory from './FounderStory'
 import RulesPage from './RulesPage'
-import TierDetails from './TierDetails'
 import PersonalDetails from './PersonalDetails'
 import Tutorial from './Tutorial'
 
@@ -296,9 +295,9 @@ export default function Dashboard({ session }) {
 
     // Onboarding
     if (onboardingStep === 'founder-story') return <FounderStory onContinue={() => setOnboardingStep('rules')} />
-    if (onboardingStep === 'rules') return <RulesPage onContinue={async () => { await supabase.from('profiles').update({ rules_acknowledged: true }).eq('id', session.user.id); setOnboardingStep('tier-details') }} />
-    if (onboardingStep === 'tier-details') return <TierDetails onContinue={() => setOnboardingStep('personal-details')} />
-    if (onboardingStep === 'personal-details') return <PersonalDetails userId={session.user.id} onContinue={async (minor, theme) => { setIsMinor(minor); applyTheme(theme); await supabase.from('profiles').update({ onboarding_complete: true }).eq('id', session.user.id); setOnboardingStep(null) }} />
+    if (onboardingStep === 'rules') return <RulesPage onContinue={async () => { await supabase.from('profiles').update({ rules_acknowledged: true }).eq('id', session.user.id); setOnboardingStep('personal-details') }} />
+    if (onboardingStep === 'personal-details') return <PersonalDetails userId={session.user.id} onContinue={async (minor, theme) => { setIsMinor(minor); applyTheme(theme); setOnboardingStep('tier-select') }} />
+    if (onboardingStep === 'tier-select') return <TierSelect userId={session.user.id} onComplete={async (tier) => { setProfile(prev => ({ ...prev, tier, tier_chosen: true })); await supabase.from('profiles').update({ onboarding_complete: true }).eq('id', session.user.id); setOnboardingStep(null) }} />
     if (!profile?.tier_chosen) return <TierSelect userId={session.user.id} onComplete={(tier) => setProfile({ ...profile, tier, tier_chosen: true })} />
 
     const successfulDays = profile?.successful_days || 0

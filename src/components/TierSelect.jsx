@@ -8,9 +8,15 @@ const TIERS = [
         price: '$0',
         priceNote: 'forever',
         cap: '$5.00',
-        description: 'Get started with habit tracking',
         badge: null,
-        features: ['All 4 daily habits', 'Streak tracking', 'Points system', 'Up to $5 reward/month'],
+        description: 'Get started with habit tracking',
+        features: [
+            'All 4 daily habits',
+            'Streak tracking',
+            'Points system',
+            'Up to $5.00 reward per month',
+        ],
+        streakBonus: false,
     },
     {
         key: 'plus',
@@ -18,10 +24,16 @@ const TIERS = [
         price: '$4.99',
         priceNote: '/month',
         cap: '$10.00',
-        description: 'Double your reward potential',
         badge: 'Popular',
-        badgeColor: { background: '#EAF2EE', color: '#4A7C65' },
-        features: ['All 4 daily habits', 'Streak tracking', 'Points system', 'Up to $10 reward/month'],
+        badgeColor: { background: 'var(--theme-primary-light)', color: 'var(--theme-primary)' },
+        description: 'Double your reward potential',
+        features: [
+            'All 4 daily habits',
+            'Streak tracking',
+            'Points system',
+            'Up to $10.00 reward per month',
+        ],
+        streakBonus: false,
     },
     {
         key: 'premium',
@@ -29,10 +41,16 @@ const TIERS = [
         price: '$14.99',
         priceNote: '/month',
         cap: '$20.00',
-        description: 'Unlock the 25-day streak bonus',
         badge: 'Best value',
-        badgeColor: { background: '#FCEEE9', color: '#C0614A' },
-        features: ['All 4 daily habits', 'Streak tracking', 'Points system', 'Up to $20 reward/month', '25-day streak = $25 bonus'],
+        badgeColor: { background: 'var(--theme-secondary-light)', color: 'var(--theme-secondary)' },
+        description: 'Unlock the 25-day streak bonus',
+        features: [
+            'All 4 daily habits',
+            'Streak tracking',
+            'Points system',
+            'Up to $20.00 reward per month',
+        ],
+        streakBonus: true,
     },
 ]
 
@@ -52,88 +70,124 @@ export default function TierSelect({ userId, onComplete }) {
         <div style={{ minHeight: '100vh', background: 'var(--theme-bg)' }} className="px-4 py-10 max-w-lg mx-auto pb-24">
 
             {/* Beta banner */}
-            <div className="text-center mb-6">
-                <span className="bg-amber-100 text-amber-700 text-xs font-medium px-3 py-1 rounded-full">
+            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                <span style={{ background: '#fef3c7', color: '#92400e', fontSize: '12px', fontWeight: '500', padding: '4px 12px', borderRadius: '20px' }}>
                     Beta testing version
                 </span>
             </div>
 
             {/* Header */}
-            <div className="text-center mb-8">
-                <h1 className="text-3xl font-bold" style={{ color: 'var(--theme-text)' }}>Niyama</h1>
-                <h2 className="text-xl font-semibold mt-3" style={{ color: 'var(--theme-text)' }}>Choose your plan</h2>
-                <p className="text-sm mt-2" style={{ color: 'var(--theme-text-secondary)' }}>You can upgrade or downgrade after launch</p>
+            <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+                <h1 style={{ fontSize: '28px', fontWeight: '700', color: 'var(--theme-text)' }}>Niyama</h1>
+                <h2 style={{ fontSize: '20px', fontWeight: '600', marginTop: '10px', color: 'var(--theme-text)' }}>Choose your plan</h2>
+                <p style={{ fontSize: '14px', color: 'var(--theme-text-secondary)', marginTop: '6px' }}>Tap a plan to select it. You can change this later.</p>
             </div>
 
             {/* Tier cards */}
-            <div className="space-y-4 mb-6">
-                {TIERS.map(tier => (
-                    <button
-                        key={tier.key}
-                        onClick={() => setSelected(tier.key)}
-                        className="w-full text-left rounded-2xl p-5 transition"
-                        style={{
-                            background: selected === tier.key ? 'var(--theme-primary-light)' : 'var(--theme-card)',
-                            border: selected === tier.key ? '2px solid var(--theme-primary)' : '1px solid var(--theme-border)',
-                        }}
-                    >
-                        {/* Tier header */}
-                        <div className="flex justify-between items-start mb-3">
-                            <div>
-                                <div className="flex items-center gap-2 mb-1">
-                                    <span className="font-bold text-lg" style={{ color: 'var(--theme-text)' }}>{tier.name}</span>
-                                    {tier.badge && (
-                                        <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={tier.badgeColor}>
-                                            {tier.badge}
-                                        </span>
-                                    )}
-                                </div>
-                                <p className="text-sm" style={{ color: 'var(--theme-text-secondary)' }}>{tier.description}</p>
-                            </div>
-                            <div className="text-right ml-4 flex-shrink-0">
-                                <p className="font-bold text-xl" style={{ color: 'var(--theme-text)' }}>{tier.price}</p>
-                                <p className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>{tier.priceNote}</p>
-                                <p className="text-sm font-semibold mt-1" style={{ color: 'var(--theme-primary)' }}>Up to {tier.cap}/mo</p>
-                            </div>
-                        </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '20px' }}>
+                {TIERS.map(tier => {
+                    const isSelected = selected === tier.key
+                    return (
+                        <button
+                            key={tier.key}
+                            onClick={() => setSelected(tier.key)}
+                            style={{
+                                background: isSelected ? 'var(--theme-primary-light)' : 'var(--theme-card)',
+                                border: isSelected ? '2px solid var(--theme-primary)' : '1px solid var(--theme-border)',
+                                borderRadius: '16px',
+                                padding: '18px 20px',
+                                width: '100%',
+                                textAlign: 'left',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                            }}
+                        >
+                            {/* Badge */}
+                            {tier.badge && (
+                                <span style={{ ...tier.badgeColor, fontSize: '11px', fontWeight: '600', padding: '3px 10px', borderRadius: '20px', display: 'inline-block', marginBottom: '10px' }}>
+                                    {tier.badge}
+                                </span>
+                            )}
 
-                        {/* Features */}
-                        <div className="space-y-1">
-                            {tier.features.map(feature => (
-                                <div key={feature} className="flex items-center gap-2">
-                                    <span className="text-xs" style={{ color: 'var(--theme-primary)' }}>✓</span>
-                                    <span className="text-xs" style={{ color: 'var(--theme-text-secondary)' }}>{feature}</span>
+                            {/* Tier header */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                                <div>
+                                    <p style={{ fontSize: '18px', fontWeight: '700', color: 'var(--theme-text)', marginBottom: '2px' }}>{tier.name}</p>
+                                    <p style={{ fontSize: '13px', color: 'var(--theme-text-secondary)' }}>{tier.description}</p>
                                 </div>
-                            ))}
-                        </div>
-
-                        {/* Selected indicator */}
-                        {selected === tier.key && (
-                            <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--theme-border)' }}>
-                                <p className="text-xs font-medium" style={{ color: 'var(--theme-primary)' }}>✓ Selected</p>
+                                <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: '12px' }}>
+                                    <p style={{ fontSize: '22px', fontWeight: '700', color: 'var(--theme-text)' }}>{tier.price}</p>
+                                    <p style={{ fontSize: '12px', color: 'var(--theme-text-muted)' }}>{tier.priceNote}</p>
+                                    <p style={{ fontSize: '13px', fontWeight: '600', color: 'var(--theme-primary)', marginTop: '2px' }}>Up to {tier.cap}/mo</p>
+                                </div>
                             </div>
-                        )}
-                    </button>
-                ))}
+
+                            {/* Divider */}
+                            <div style={{ borderTop: '1px solid var(--theme-border)', marginBottom: '12px' }} />
+
+                            {/* Features */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                {tier.features.map(f => (
+                                    <div key={f} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <span style={{ color: 'var(--theme-primary)', fontSize: '13px', flexShrink: 0 }}>✓</span>
+                                        <span style={{ fontSize: '13px', color: 'var(--theme-text-secondary)' }}>{f}</span>
+                                    </div>
+                                ))}
+                                {tier.streakBonus ? (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <span style={{ fontSize: '13px', flexShrink: 0 }}>🏆</span>
+                                        <span style={{ fontSize: '13px', color: 'var(--theme-secondary)', fontWeight: '500' }}>25-day streak = $25 bonus payout</span>
+                                    </div>
+                                ) : (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <span style={{ color: 'var(--theme-text-muted)', fontSize: '13px', flexShrink: 0 }}>✗</span>
+                                        <span style={{ fontSize: '13px', color: 'var(--theme-text-muted)' }}>25-day streak bonus not available</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Selected indicator */}
+                            {isSelected && (
+                                <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--theme-border)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <span style={{ color: 'var(--theme-primary)', fontSize: '14px' }}>✓</span>
+                                    <p style={{ fontSize: '13px', fontWeight: '600', color: 'var(--theme-primary)' }}>Selected</p>
+                                </div>
+                            )}
+                        </button>
+                    )
+                })}
             </div>
 
             {/* Beta notice */}
-            <div className="rounded-2xl p-5 mb-6" style={{ background: '#fffbeb', border: '1px solid #fcd34d' }}>
-                <h3 className="font-semibold mb-2" style={{ color: '#92400e' }}>🧪 Beta testing notice</h3>
-                <p className="text-sm leading-relaxed" style={{ color: '#78350f' }}>
-                    During beta testing no subscription fees will be charged and no monetary rewards will be paid out. Your tier selection will carry over when the full version launches.
-                </p>
+            <div style={{ background: '#fffbeb', border: '1px solid #fcd34d', borderRadius: '14px', padding: '16px', marginBottom: '20px' }}>
+                <p style={{ fontSize: '13px', fontWeight: '600', color: '#92400e', marginBottom: '8px' }}>🧪 Beta testing notice</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    {[
+                        '✓ No subscription fees will be charged during beta',
+                        '✓ No monetary rewards will be paid out during beta',
+                        '✓ All tiers are fully functional during beta',
+                        '✓ Your selection carries over when the full version launches',
+                    ].map((item, i) => (
+                        <p key={i} style={{ fontSize: '12px', color: '#78350f' }}>{item}</p>
+                    ))}
+                </div>
             </div>
 
             {/* Confirm button */}
             <button
                 onClick={confirmTier}
                 disabled={!selected || saving}
-                className="w-full font-semibold py-3 rounded-lg transition"
                 style={{
                     background: selected ? 'var(--theme-primary)' : 'var(--theme-border)',
                     color: selected ? 'white' : 'var(--theme-text-muted)',
+                    width: '100%',
+                    fontWeight: '600',
+                    padding: '14px',
+                    borderRadius: '10px',
+                    fontSize: '15px',
                     cursor: selected ? 'pointer' : 'not-allowed',
+                    border: 'none',
+                    transition: 'all 0.2s',
                 }}
             >
                 {saving ? 'Saving...' : selected ? `Continue with ${TIERS.find(t => t.key === selected)?.name}` : 'Select a plan to continue'}
