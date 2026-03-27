@@ -118,7 +118,11 @@ export default function Dashboard({ session }) {
         setLoading(true)
         const userId = session.user.id
         const { data: profileData } = await supabase.from('profiles').select('*').eq('id', userId).single()
-
+        // Auto-detect and store timezone silently
+        const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+        if (detectedTimezone && profileData?.timezone !== detectedTimezone) {
+            await supabase.from('profiles').update({ timezone: detectedTimezone }).eq('id', userId)
+        }
         if (profileData) {
             if (profileData.color_theme) applyTheme(profileData.color_theme)
             if (profileData.is_minor) setIsMinor(true)

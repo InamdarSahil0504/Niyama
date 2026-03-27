@@ -324,7 +324,24 @@ export default function Admin() {
         if (age < 55) return '45-54'
         return '55+'
     }
+    function getUserLocalTime(timezone) {
+        if (!timezone) return '—'
+        try {
+            return new Date().toLocaleTimeString('en-US', {
+                timeZone: timezone,
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+            })
+        } catch (e) {
+            return '—'
+        }
+    }
 
+    function formatTimezone(timezone) {
+        if (!timezone) return '—'
+        return timezone.replace('America/', '').replace('_', ' ')
+    }
     function calcRetention(days) {
         const cohortUsers = users.filter(u => {
             const joined = new Date(u.created_at)
@@ -625,6 +642,8 @@ export default function Admin() {
                     <Row label="Theme" value={user.color_theme || 'sage'} />
                     <Row label="Minor" value={user.is_minor ? 'Yes' : 'No'} />
                     <Row label="Status" value={getUserStatus(user)} color={getStatusColor(getUserStatus(user))} />
+                    <Row label="Timezone" value={user.timezone ? formatTimezone(user.timezone) : '—'} />
+                    <Row label="Local time" value={getUserLocalTime(user.timezone)} color='var(--theme-primary)' />
                     <div style={{ marginTop: '12px' }}>
                         <p style={{ fontSize: '12px', color: s.muted, marginBottom: '6px' }}>Change tier</p>
                         <select value={user.tier || 'free'} onChange={e => { changeTier(user.id, e.target.value); setSelectedUser({ ...user, tier: e.target.value }) }}
@@ -1281,7 +1300,7 @@ export default function Admin() {
                             <div style={{ background: s.card, border: `1px solid ${s.cardBorder}`, borderRadius: '12px', overflow: 'hidden' }}>
                                 {/* Table header */}
                                 <div style={{ display: 'grid', gridTemplateColumns: exportMode ? '40px 40px 1fr 80px 60px 80px 100px 100px 100px' : '40px 1fr 80px 60px 80px 100px 100px 100px', gap: '0', padding: '12px 16px', borderBottom: `1px solid ${s.cardBorder}`, background: '#161d29' }}>
-                                    {[...(exportMode ? ['☑'] : []), '#', 'Name', 'Gender', 'Age', 'Tier', 'Joined', 'Last Active', 'Status'].map(h => (
+                                    {[...(exportMode ? ['☑'] : []), '#', 'Name', 'Gender', 'Age', 'Tier', 'Local Time', 'Status'].map(h => (
                                         <p key={h} style={{ fontSize: '11px', fontWeight: '600', color: s.muted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</p>
                                     ))}
                                 </div>
@@ -1305,7 +1324,7 @@ export default function Admin() {
                                                         await fetchUserMessages(user.id)
                                                     }
                                                 }}
-                                                style={{ display: 'grid', gridTemplateColumns: exportMode ? '40px 40px 1fr 80px 60px 80px 100px 100px 100px' : '40px 1fr 80px 60px 80px 100px 100px 100px', gap: '0', padding: '14px 16px', borderBottom: `1px solid ${s.cardBorder}`, cursor: 'pointer', background: exportSelectedUsers.includes(user.id) ? '#1e3a2f' : fraud ? '#1a0a0a' : 'transparent', transition: 'background 0.15s' }}
+                                                style={{ display: 'grid', gridTemplateColumns: exportMode ? '40px 40px 1fr 80px 60px 80px 100px 100px 100px' : '40px 1fr 80px 60px 80px 110px 100px', gap: '0', padding: '14px 16px', borderBottom: `1px solid ${s.cardBorder}`, cursor: 'pointer', background: exportSelectedUsers.includes(user.id) ? '#1e3a2f' : fraud ? '#1a0a0a' : 'transparent', transition: 'background 0.15s' }}
                                                 onMouseEnter={e => e.currentTarget.style.background = exportSelectedUsers.includes(user.id) ? '#1e3a2f' : fraud ? '#2a0a0a' : '#252f3f'}
                                                 onMouseLeave={e => e.currentTarget.style.background = exportSelectedUsers.includes(user.id) ? '#1e3a2f' : fraud ? '#1a0a0a' : 'transparent'}>
                                                 {exportMode && (
@@ -1328,8 +1347,11 @@ export default function Admin() {
                                                 <p style={{ fontSize: '13px', color: s.muted }}>{user.gender || '—'}</p>
                                                 <p style={{ fontSize: '13px', color: s.muted }}>{user.age || '—'}</p>
                                                 <span style={{ fontSize: '11px', fontWeight: '500', color: user.tier === 'premium' ? s.warning : user.tier === 'plus' ? s.info : s.muted, textTransform: 'capitalize' }}>{user.tier || 'free'}</span>
-                                                <p style={{ fontSize: '12px', color: s.muted }}>{user.created_at ? user.created_at.split('T')[0] : '—'}</p>
-                                                <p style={{ fontSize: '12px', color: s.muted }}>{user.last_active_date || 'Never'}</p>
+                                                <div>
+                                                    <p style={{ fontSize: '12px', color: s.primary, fontWeight: '500' }}>{getUserLocalTime(user.timezone)}</p>
+                                                    <p style={{ fontSize: '10px', color: s.muted }}>{user.timezone ? formatTimezone(user.timezone) : '—'}</p>
+                                                </div>
+                                                <span style={{ fontSize: '11px', fontWeight: '500', color: getStatusColor(status), textTransform: 'capitalize' }}>{status}</span>
                                                 <span style={{ fontSize: '11px', fontWeight: '500', color: getStatusColor(status), textTransform: 'capitalize' }}>{status}</span>
                                             </div>
                                         )
