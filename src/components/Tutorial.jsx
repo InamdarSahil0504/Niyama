@@ -29,7 +29,7 @@ const STEPS = [
     {
         target: 'nav',
         title: '🗺️ Navigate the app',
-        message: 'Use the tabs at the bottom to explore Analytics, Rewards and Settings. You can replay this tour from Settings → Getting started.',
+        message: 'Use the tabs at the bottom to explore Analytics, Rewards and Settings. You can replay this tour anytime from Settings → Getting started.',
     },
 ]
 
@@ -65,120 +65,125 @@ export default function Tutorial({ onComplete }) {
             target.style.boxShadow = '0 0 0 6px rgba(212,115,95,0.15)'
             target.style.borderRadius = '16px'
             target.style.transition = 'all 0.3s'
-            target.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            // Don't scroll to bottom nav — scroll to top instead
+            if (targetMap[current.target] === 'bottom-nav') {
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+            } else {
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            }
         }
-    }
 
-    useEffect(() => {
-        setTimeout(highlightTarget, 150)
-        return () => {
-            document.querySelectorAll('[data-tutorial]').forEach(el => {
-                el.style.outline = 'none'
-                el.style.boxShadow = 'none'
-            })
+        useEffect(() => {
+            setTimeout(highlightTarget, 150)
+            return () => {
+                document.querySelectorAll('[data-tutorial]').forEach(el => {
+                    el.style.outline = 'none'
+                    el.style.boxShadow = 'none'
+                })
+            }
+        }, [step])
+
+        function handleNext() {
+            if (isLast) {
+                // Clean up all highlights
+                document.querySelectorAll('[data-tutorial]').forEach(el => {
+                    el.style.outline = 'none'
+                    el.style.boxShadow = 'none'
+                })
+                onComplete()
+            } else {
+                setStep(step + 1)
+            }
         }
-    }, [step])
 
-    function handleNext() {
-        if (isLast) {
-            // Clean up all highlights
+        function handleBack() {
+            if (step > 0) setStep(step - 1)
+        }
+
+        function handleSkip() {
             document.querySelectorAll('[data-tutorial]').forEach(el => {
                 el.style.outline = 'none'
                 el.style.boxShadow = 'none'
             })
             onComplete()
-        } else {
-            setStep(step + 1)
         }
-    }
 
-    function handleBack() {
-        if (step > 0) setStep(step - 1)
-    }
-
-    function handleSkip() {
-        document.querySelectorAll('[data-tutorial]').forEach(el => {
-            el.style.outline = 'none'
-            el.style.boxShadow = 'none'
-        })
-        onComplete()
-    }
-
-    return (
-        <>
-            {/* Semi-transparent backdrop — non-blocking so user can see dashboard */}
-            <div style={{
-                position: 'fixed', inset: 0, zIndex: 998,
-                pointerEvents: 'none',
-                background: 'rgba(0,0,0,0.15)',
-            }} />
-
-            {/* Bottom sheet tooltip */}
-            <div style={{
-                position: 'fixed', bottom: 0, left: 0, right: 0,
-                zIndex: 999,
-                padding: '0 16px 32px',
-                maxWidth: '448px',
-                margin: '0 auto',
-            }}>
+        return (
+            <>
+                {/* Semi-transparent backdrop — non-blocking so user can see dashboard */}
                 <div style={{
-                    background: 'var(--theme-card)',
-                    borderRadius: '20px 20px 16px 16px',
-                    padding: '20px',
-                    border: '1px solid var(--theme-border)',
-                    boxShadow: '0 -4px 24px rgba(0,0,0,0.12)',
+                    position: 'fixed', inset: 0, zIndex: 998,
+                    pointerEvents: 'none',
+                    background: 'rgba(0,0,0,0.15)',
+                }} />
+
+                {/* Bottom sheet tooltip */}
+                <div style={{
+                    position: 'fixed', bottom: 0, left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: '100%',
+                    maxWidth: '448px',
+                    zIndex: 999,
+                    padding: '0 16px 16px',
                 }}>
+                    <div style={{
+                        background: 'var(--theme-card)',
+                        borderRadius: '20px 20px 16px 16px',
+                        padding: '20px',
+                        border: '1px solid var(--theme-border)',
+                        boxShadow: '0 -4px 24px rgba(0,0,0,0.12)',
+                    }}>
 
-                    {/* Progress dots */}
-                    <div style={{ display: 'flex', gap: '6px', marginBottom: '14px', justifyContent: 'center' }}>
-                        {STEPS.map((_, i) => (
-                            <div key={i} style={{
-                                height: '4px',
-                                borderRadius: '2px',
-                                flex: i === step ? '2' : '1',
-                                background: i <= step ? 'var(--theme-primary)' : 'var(--theme-border)',
-                                transition: 'all 0.3s',
-                            }} />
-                        ))}
-                    </div>
-
-                    {/* Step indicator */}
-                    <p style={{ fontSize: '11px', color: 'var(--theme-text-muted)', marginBottom: '6px', textAlign: 'center' }}>
-                        Step {step + 1} of {STEPS.length}
-                    </p>
-
-                    {/* Title */}
-                    <p style={{ fontSize: '16px', fontWeight: '700', color: 'var(--theme-text)', marginBottom: '8px' }}>
-                        {current.title}
-                    </p>
-
-                    {/* Message */}
-                    <p style={{ fontSize: '14px', color: 'var(--theme-text-secondary)', lineHeight: '1.6', marginBottom: '16px' }}>
-                        {current.message}
-                    </p>
-
-                    {/* Buttons */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <button onClick={handleSkip}
-                            style={{ fontSize: '13px', color: 'var(--theme-text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-                            Skip tour
-                        </button>
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                            {step > 0 && (
-                                <button onClick={handleBack}
-                                    style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', borderRadius: '8px', padding: '8px 14px', fontSize: '13px', color: 'var(--theme-text-secondary)', cursor: 'pointer' }}>
-                                    ← Back
-                                </button>
-                            )}
-                            <button onClick={handleNext}
-                                style={{ background: 'var(--theme-primary)', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 20px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
-                                {isLast ? 'Got it! 🎉' : 'Next →'}
-                            </button>
+                        {/* Progress dots */}
+                        <div style={{ display: 'flex', gap: '6px', marginBottom: '14px', justifyContent: 'center' }}>
+                            {STEPS.map((_, i) => (
+                                <div key={i} style={{
+                                    height: '4px',
+                                    borderRadius: '2px',
+                                    flex: i === step ? '2' : '1',
+                                    background: i <= step ? 'var(--theme-primary)' : 'var(--theme-border)',
+                                    transition: 'all 0.3s',
+                                }} />
+                            ))}
                         </div>
-                    </div>
 
+                        {/* Step indicator */}
+                        <p style={{ fontSize: '11px', color: 'var(--theme-text-muted)', marginBottom: '6px', textAlign: 'center' }}>
+                            Step {step + 1} of {STEPS.length}
+                        </p>
+
+                        {/* Title */}
+                        <p style={{ fontSize: '16px', fontWeight: '700', color: 'var(--theme-text)', marginBottom: '8px' }}>
+                            {current.title}
+                        </p>
+
+                        {/* Message */}
+                        <p style={{ fontSize: '14px', color: 'var(--theme-text-secondary)', lineHeight: '1.6', marginBottom: '16px' }}>
+                            {current.message}
+                        </p>
+
+                        {/* Buttons */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <button onClick={handleSkip}
+                                style={{ fontSize: '13px', color: 'var(--theme-text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                                Skip tour
+                            </button>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                {step > 0 && (
+                                    <button onClick={handleBack}
+                                        style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', borderRadius: '8px', padding: '8px 14px', fontSize: '13px', color: 'var(--theme-text-secondary)', cursor: 'pointer' }}>
+                                        ← Back
+                                    </button>
+                                )}
+                                <button onClick={handleNext}
+                                    style={{ background: 'var(--theme-primary)', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 20px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
+                                    {isLast ? 'Got it! 🎉' : 'Next →'}
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
-            </div>
-        </>
-    )
-}
+            </>
+        )
+    }
