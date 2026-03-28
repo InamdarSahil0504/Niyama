@@ -370,6 +370,7 @@ export default function Admin() {
             steps: userHabits.filter(h => h.steps_over_5000).length,
             screen: userHabits.filter(h => h.screen_under_2hrs).length,
             sleep: userHabits.filter(h => h.sleep_before_1030).length,
+            heart: userHabits.filter(h => h.active_heart_rate).length,
             total: userHabits.length,
             successful: userHabits.filter(h => h.day_successful).length,
         }
@@ -494,12 +495,14 @@ export default function Admin() {
             if (exportColumns.includes('habits')) {
                 row['Wake (All Time)'] = allTimeHabits.wake
                 row['Steps (All Time)'] = allTimeHabits.steps
-                row['Screen (All Time)'] = allTimeHabits.screen
+                row['Screen Under 3hrs (All Time)'] = allTimeHabits.screen
                 row['Sleep (All Time)'] = allTimeHabits.sleep
+                row['Active Heart Rate (All Time)'] = allTimeHabits.heart
                 row['Wake (This Month)'] = monthlyHabits.wake
                 row['Steps (This Month)'] = monthlyHabits.steps
-                row['Screen (This Month)'] = monthlyHabits.screen
+                row['Screen Under 3hrs (This Month)'] = monthlyHabits.screen
                 row['Sleep (This Month)'] = monthlyHabits.sleep
+                row['Active Heart Rate (This Month)'] = monthlyHabits.heart
             }
             if (exportColumns.includes('rewards')) {
                 row['Total Reward Earned (All Time)'] = `$${totalRewardEarned.toFixed(2)}`
@@ -564,6 +567,7 @@ export default function Admin() {
         steps: allHabits.filter(h => h.steps_over_5000).length,
         screen: allHabits.filter(h => h.screen_under_2hrs).length,
         sleep: allHabits.filter(h => h.sleep_before_1030).length,
+        heart: allHabits.filter(h => h.active_heart_rate).length,
     }
     const timeOfDay = getTimeOfDayData()
     const featureAdoption = getFeatureAdoption()
@@ -685,10 +689,11 @@ export default function Admin() {
                     <Row label="Successful days" value={user.successful_days || 0} />
                     <Row label="Consecutive inactive days" value={user.consecutive_inactive_days || 0} color={(user.consecutive_inactive_days || 0) >= 5 ? s.danger : s.text} />
                     <Row label="Last active" value={user.last_active_date || 'Never'} />
-                    <Row label="Wake habit (month)" value={`${monthlyHabits.wake} / ${monthlyHabits.total} days`} />
-                    <Row label="Steps habit (month)" value={`${monthlyHabits.steps} / ${monthlyHabits.total} days`} />
-                    <Row label="Screen habit (month)" value={`${monthlyHabits.screen} / ${monthlyHabits.total} days`} />
-                    <Row label="Sleep habit (month)" value={`${monthlyHabits.sleep} / ${monthlyHabits.total} days`} />
+                    <Row label="Wake (month)" value={`${monthlyHabits.wake} / ${monthlyHabits.total} days`} />
+                    <Row label="Steps (month)" value={`${monthlyHabits.steps} / ${monthlyHabits.total} days`} />
+                    <Row label="Screen under 3hrs (month)" value={`${monthlyHabits.screen} / ${monthlyHabits.total} days`} />
+                    <Row label="Sleep (month)" value={`${monthlyHabits.sleep} / ${monthlyHabits.total} days`} />
+                    <Row label="Active heart rate (month)" value={`${monthlyHabits.heart} / ${monthlyHabits.total} days`} />
                 </Section>
 
                 {/* All time */}
@@ -699,10 +704,11 @@ export default function Admin() {
                     <Row label="Total habits completed" value={user.total_habits_completed || 0} />
                     <Row label="Avg habits per day" value={user.total_days_logged > 0 ? ((user.total_habits_completed || 0) / user.total_days_logged).toFixed(1) : '0.0'} />
                     <Row label="Longest streak" value={`${streak?.longest_streak || 0} days`} />
-                    <Row label="Wake habit (all time)" value={`${allTimeHabits.wake} days`} />
-                    <Row label="Steps habit (all time)" value={`${allTimeHabits.steps} days`} />
-                    <Row label="Screen habit (all time)" value={`${allTimeHabits.screen} days`} />
-                    <Row label="Sleep habit (all time)" value={`${allTimeHabits.sleep} days`} />
+                    <Row label="Wake (all time)" value={`${allTimeHabits.wake} days`} />
+                    <Row label="Steps (all time)" value={`${allTimeHabits.steps} days`} />
+                    <Row label="Screen under 3hrs (all time)" value={`${allTimeHabits.screen} days`} />
+                    <Row label="Sleep (all time)" value={`${allTimeHabits.sleep} days`} />
+                    <Row label="Active heart rate (all time)" value={`${allTimeHabits.heart} days`} />
                 </Section>
 
                 {/* Rewards */}
@@ -1090,8 +1096,9 @@ export default function Admin() {
                                 {[
                                     { label: '🌅 Wake before 7:30 AM', count: habitBreakdownAll.wake },
                                     { label: '👟 Steps 10,000+', count: habitBreakdownAll.steps },
-                                    { label: '📵 Screen under 2hrs', count: habitBreakdownAll.screen },
+                                    { label: '📵 Screen under 3hrs', count: habitBreakdownAll.screen },
                                     { label: '🌙 Sleep by 10:30 PM', count: habitBreakdownAll.sleep },
+                                    { label: '❤️ 30 min active heart rate', count: habitBreakdownAll.heart },
                                 ].map(habit => {
                                     const maxCount = Math.max(...Object.values(habitBreakdownAll)) || 1
                                     return (
