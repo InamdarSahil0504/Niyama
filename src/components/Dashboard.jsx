@@ -14,6 +14,7 @@ const HABITS = [
     { key: 'steps_over_5000', label: 'Steps 10,000 or more', points: 100, penalty: 75 },
     { key: 'screen_under_2hrs', label: 'Screen time under 2 hrs', points: 100, penalty: 75 },
     { key: 'sleep_before_1030', label: 'Sleep by 10:30 PM', points: 100, penalty: 50 },
+    { key: 'active_heart_rate', label: '30 min active heart rate', points: 100, penalty: 0, flex: true },
 ]
 
 const TIER_CAPS = { free: 5, plus: 10, premium: 20 }
@@ -21,16 +22,23 @@ const TIER_CAPS = { free: 5, plus: 10, premium: 20 }
 function calcLivePoints(habits) {
     let points = 250
     HABITS.forEach(h => { if (habits[h.key]) points += h.points })
-    if (HABITS.every(h => habits[h.key])) points += 100
-    return points
+    const completedCount = HABITS.filter(h => habits[h.key]).length
+    if (completedCount >= 4) points += 100
+    return Math.min(points, 750)
 }
 
 function calcPoints(habits) {
     let points = 250
-    let allCompleted = true
-    HABITS.forEach(h => { if (habits[h.key]) { points += h.points } else { points -= h.penalty; allCompleted = false } })
-    if (allCompleted) points += 100
-    return Math.max(points, 0)
+    HABITS.forEach(h => {
+        if (habits[h.key]) {
+            points += h.points
+        } else if (!h.flex) {
+            points -= h.penalty
+        }
+    })
+    const completedCount = HABITS.filter(h => habits[h.key]).length
+    if (completedCount >= 4) points += 100
+    return Math.max(Math.min(points, 750), 0)
 }
 
 function calcReward(monthlyPoints, tier, streakBonusUnlocked, successfulDays, consecutiveInactiveDays) {
@@ -91,7 +99,7 @@ export default function Dashboard({ session }) {
     const [onboardingStep, setOnboardingStep] = useState(null)
     const [isMinor, setIsMinor] = useState(false)
     const [activeTab, setActiveTab] = useState('home')
-    const [habits, setHabits] = useState({ wake_before_8: false, screen_under_2hrs: false, steps_over_5000: false, sleep_before_1030: false })
+    const [habits, setHabits] = useState({ wake_before_8: false, screen_under_2hrs: false, steps_over_5000: false, sleep_before_1030: false, active_heart_rate: false })
 
     const today = new Date().toISOString().split('T')[0]
     const now = new Date()
@@ -103,7 +111,8 @@ export default function Dashboard({ session }) {
     const [showTutorial, setShowTutorial] = useState(false)
     useEffect(() => { fetchData() }, [])
 
-    const allFourChecked = HABITS.every(h => habits[h.key] === true)
+    const completedHabitCount = HABITS.filter(h => habits[h.key] === true).length
+    const allFourChecked = completedHabitCount >= 4
 
     useEffect(() => {
         const count = HABITS.filter(h => habits[h.key]).length
@@ -146,13 +155,16 @@ export default function Dashboard({ session }) {
             const { data: yHabits } = await supabase.from('habits').select('*').eq('user_id', userId).eq('date', yesterdayStr).single()
 
             if (yHabits && !yHabits.submitted) {
-                const daySuccessful = yHabits.wake_before_8 && yHabits.steps_over_5000 && yHabits.screen_under_2hrs && yHabits.sleep_before_1030
+                const completedYesterday = [yHabits.wake_before_8, yHabits.steps_over_5000, yHabits.screen_under_2hrs, yHabits.sleep_before_1030, yHabits.active_heart_rate || false].filter(Boolean).length
+                const daySuccessful = completedYesterday >= 4
                 let pts = 250
                 if (yHabits.wake_before_8) pts += 100; else pts -= 50
                 if (yHabits.steps_over_5000) pts += 100; else pts -= 75
                 if (yHabits.screen_under_2hrs) pts += 100; else pts -= 75
                 if (yHabits.sleep_before_1030) pts += 100; else pts -= 50
-                if (daySuccessful) pts += 100
+                if (yHabits.active_heart_rate) pts += 100
+                if (completedYesterday >= 4) pts += 100
+                pts = Math.min(pts, 750)
                 await supabase.from('habits').update({ submitted: true, day_successful: daySuccessful, points_earned: Math.max(pts, 0) }).eq('id', yHabits.id)
             } else if (!yHabits) {
                 await supabase.from('habits').insert({ user_id: userId, date: yesterdayStr, wake_before_8: false, steps_over_5000: false, screen_under_2hrs: false, sleep_before_1030: false, day_successful: false, points_earned: 0, submitted: true })
@@ -172,7 +184,7 @@ export default function Dashboard({ session }) {
         const { data: habitData } = await supabase.from('habits').select('*').eq('user_id', userId).eq('date', today).single()
         if (habitData) {
             setTodayHabits(habitData)
-            setHabits({ wake_before_8: habitData.wake_before_8, screen_under_2hrs: habitData.screen_under_2hrs, steps_over_5000: habitData.steps_over_5000, sleep_before_1030: habitData.sleep_before_1030 })
+            setHabits({ wake_before_8: habitData.wake_before_8, screen_under_2hrs: habitData.screen_under_2hrs, steps_over_5000: habitData.steps_over_5000, sleep_before_1030: habitData.sleep_before_1030, active_heart_rate: habitData.active_heart_rate || false })
         }
 
         setLoading(false)
@@ -194,7 +206,7 @@ export default function Dashboard({ session }) {
         setSaving('submit')
         const userId = session.user.id
         const points = calcPoints(habits)
-        const daySuccessful = HABITS.every(h => habits[h.key] === true)
+        const daySuccessful = HABITS.filter(h => habits[h.key] === true).length >= 4
 
         if (todayHabits) {
             await supabase.from('habits').update({ ...habits, day_successful: daySuccessful, points_earned: points, submitted: true }).eq('id', todayHabits.id)
@@ -493,7 +505,8 @@ export default function Dashboard({ session }) {
                         {/* Habits */}
                         <div data-tutorial="habits" style={{ background: 'var(--theme-card)', border: '1px solid var(--theme-border)', borderRadius: '16px', padding: '20px', marginBottom: '16px' }}>
                             <h2 style={{ fontSize: '17px', fontWeight: '600', color: 'var(--theme-text)', marginBottom: '4px' }}>Today's habits</h2>
-                            <p style={{ fontSize: '12px', color: 'var(--theme-text-muted)', marginBottom: '16px' }}>Base: 250 pts · Perfect day: 750 pts</p>
+                            <p style={{ fontSize: '12px', color: 'var(--theme-text-muted)', marginBottom: '4px' }}>Base: 250 pts · Perfect day: 750 pts</p>
+                            <p style={{ fontSize: '11px', color: 'var(--theme-text-muted)', marginBottom: '16px' }}>Complete any 4 of 5 habits for a successful day</p>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                                 {HABITS.map(habit => (
@@ -509,12 +522,21 @@ export default function Dashboard({ session }) {
                                                 disabled={!!todayHabits?.submitted || (habit.key === 'wake_before_8' && isPastWakeDeadline) || (habit.key === 'sleep_before_1030' && isPastSleepDeadline)}
                                                 style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--theme-primary)' }}
                                             />
-                                            <span style={{ fontSize: '14px', color: habits[habit.key] ? 'var(--theme-text)' : 'var(--theme-text-muted)' }}>{habit.label}</span>
+                                            <div>
+                                                <span style={{ fontSize: '14px', color: habits[habit.key] ? 'var(--theme-text)' : 'var(--theme-text-muted)' }}>{habit.label}</span>
+                                                {habit.flex && (
+                                                    <span style={{ fontSize: '10px', background: 'var(--theme-secondary-light)', color: 'var(--theme-secondary)', padding: '1px 6px', borderRadius: '8px', marginLeft: '6px', fontWeight: '500' }}>flex</span>
+                                                )}
+                                            </div>
                                         </div>
                                         <span style={{ fontSize: '12px', flexShrink: '0' }}>
                                             <span style={{ color: 'var(--theme-primary)', fontWeight: '500' }}>+{habit.points}</span>
-                                            <span style={{ color: 'var(--theme-text-muted)' }}> / </span>
-                                            <span style={{ color: 'var(--theme-secondary)', fontWeight: '500' }}>-{habit.penalty}</span>
+                                            {!habit.flex && (
+                                                <>
+                                                    <span style={{ color: 'var(--theme-text-muted)' }}> / </span>
+                                                    <span style={{ color: 'var(--theme-secondary)', fontWeight: '500' }}>-{habit.penalty}</span>
+                                                </>
+                                            )}
                                         </span>
                                     </label>
                                 ))}
@@ -545,7 +567,9 @@ export default function Dashboard({ session }) {
                                     animation: 'bounce-in 0.4s ease-out, card-glow 1.5s ease-in-out 0.4s',
                                 }}>
                                     <p style={{ fontSize: '22px', animation: 'checkmark-pulse 0.6s ease-in-out', marginBottom: '4px' }}>✅</p>
-                                    <p style={{ fontSize: '15px', fontWeight: '700', color: 'var(--theme-primary)' }}>All 4 habits completed!</p>
+                                    <p style={{ fontSize: '15px', fontWeight: '700', color: 'var(--theme-primary)' }}>
+                                        {completedHabitCount === 5 ? 'All 5 habits completed!' : '4 habits completed!'}
+                                    </p>
                                     <p style={{ fontSize: '12px', color: 'var(--theme-text-secondary)', marginTop: '4px' }}>Amazing work today. Don't forget to submit!</p>
                                 </div>
                             )}

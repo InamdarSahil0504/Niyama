@@ -324,17 +324,23 @@ export default function Settings({ profile, session, onSignOut, onReplayTutorial
                     <h3 style={cardTitle}>Your 4 daily habits</h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                         {[
-                            { habit: 'Wake before 7:30 AM', complete: '+100 pts', incomplete: '-50 pts' },
-                            { habit: 'Steps 10,000 or more', complete: '+100 pts', incomplete: '-75 pts' },
-                            { habit: 'Screen time under 2 hrs', complete: '+100 pts', incomplete: '-75 pts' },
-                            { habit: 'Sleep by 10:30 PM', complete: '+100 pts', incomplete: '-50 pts' },
+                            { habit: 'Wake before 7:30 AM', complete: '+100 pts', incomplete: '-50 pts', flex: false },
+                            { habit: 'Steps 10,000 or more', complete: '+100 pts', incomplete: '-75 pts', flex: false },
+                            { habit: 'Screen time under 2 hrs', complete: '+100 pts', incomplete: '-75 pts', flex: false },
+                            { habit: 'Sleep by 10:30 PM', complete: '+100 pts', incomplete: '-50 pts', flex: false },
+                            { habit: '30 min active heart rate', complete: '+100 pts', incomplete: 'no penalty', flex: true },
                         ].map(item => (
                             <div key={item.habit} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{ fontSize: '14px', color: 'var(--theme-text-secondary)' }}>{item.habit}</span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <span style={{ fontSize: '14px', color: 'var(--theme-text-secondary)' }}>{item.habit}</span>
+                                    {item.flex && (
+                                        <span style={{ fontSize: '10px', background: 'var(--theme-secondary-light)', color: 'var(--theme-secondary)', padding: '1px 6px', borderRadius: '8px', fontWeight: '500' }}>flex</span>
+                                    )}
+                                </div>
                                 <div style={{ display: 'flex', gap: '8px', fontSize: '12px' }}>
                                     <span style={{ color: 'var(--theme-primary)', fontWeight: '500' }}>{item.complete}</span>
                                     <span style={{ color: 'var(--theme-text-muted)' }}>/</span>
-                                    <span style={{ color: 'var(--theme-secondary)', fontWeight: '500' }}>{item.incomplete}</span>
+                                    <span style={{ color: item.flex ? 'var(--theme-text-muted)' : 'var(--theme-secondary)', fontWeight: '500' }}>{item.incomplete}</span>
                                 </div>
                             </div>
                         ))}

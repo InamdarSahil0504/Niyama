@@ -18,17 +18,23 @@ export default function RulesPage({ onContinue, showButton = true }) {
                 <h3 style={{ fontWeight: '600', color: 'var(--theme-text)', marginBottom: '16px' }}>Your 4 daily habits</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {[
-                        { habit: 'Wake before 7:30 AM', complete: '+100 pts', incomplete: '-50 pts' },
-                        { habit: 'Steps 10,000 or more', complete: '+100 pts', incomplete: '-75 pts' },
-                        { habit: 'Screen time under 2 hrs', complete: '+100 pts', incomplete: '-75 pts' },
-                        { habit: 'Sleep by 10:30 PM', complete: '+100 pts', incomplete: '-50 pts' },
+                        { habit: 'Wake before 7:30 AM', complete: '+100 pts', incomplete: '-50 pts', flex: false },
+                        { habit: 'Steps 10,000 or more', complete: '+100 pts', incomplete: '-75 pts', flex: false },
+                        { habit: 'Screen time under 2 hrs', complete: '+100 pts', incomplete: '-75 pts', flex: false },
+                        { habit: 'Sleep by 10:30 PM', complete: '+100 pts', incomplete: '-50 pts', flex: false },
+                        { habit: '30 min active heart rate', complete: '+100 pts', incomplete: 'no penalty', flex: true },
                     ].map(item => (
                         <div key={item.habit} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '14px', color: 'var(--theme-text-secondary)' }}>{item.habit}</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ fontSize: '14px', color: 'var(--theme-text-secondary)' }}>{item.habit}</span>
+                                {item.flex && (
+                                    <span style={{ fontSize: '10px', background: 'var(--theme-secondary-light)', color: 'var(--theme-secondary)', padding: '1px 6px', borderRadius: '8px', fontWeight: '500' }}>flex</span>
+                                )}
+                            </div>
                             <div style={{ display: 'flex', gap: '8px', fontSize: '12px' }}>
                                 <span style={{ color: 'var(--theme-primary)', fontWeight: '500' }}>{item.complete}</span>
                                 <span style={{ color: 'var(--theme-text-muted)' }}>/</span>
-                                <span style={{ color: 'var(--theme-secondary)', fontWeight: '500' }}>{item.incomplete}</span>
+                                <span style={{ color: item.flex ? 'var(--theme-text-muted)' : 'var(--theme-secondary)', fontWeight: '500' }}>{item.incomplete}</span>
                             </div>
                         </div>
                     ))}
@@ -65,7 +71,7 @@ export default function RulesPage({ onContinue, showButton = true }) {
                 <h3 style={{ fontWeight: '600', color: 'var(--theme-text)', marginBottom: '16px' }}>Reward eligibility rules</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {[
-                        'Minimum of 7 successful days per month to qualify. A successful day means all 4 habits completed.',
+                        'Minimum of 7 successful days per month to qualify. A successful day means completing any 4 out of 5 habits.',
                         'No more than 5 consecutive inactive days. Exceeding this disqualifies you from rewards that month.',
                         'Reward = min(points value, tier cap). Points value = monthly points divided by 1,000.',
                         'Rewards reset at the start of every month. Points do not carry over.',
