@@ -242,7 +242,7 @@ export default function Settings({ profile, session, onSignOut, onReplayTutorial
                     <p style={{ ...bodyText, marginBottom: '12px' }}>To qualify for a reward each month you need to:</p>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         {[
-                            { icon: '✓', text: 'Complete at least 7 successful days — where all 4 habits are done', color: 'var(--theme-primary)' },
+                            { icon: '✓', text: 'Complete at least 7 successful days — any 4 out of 5 habits counts as a successful day', color: 'var(--theme-primary)' },
                             { icon: '✓', text: 'Avoid being inactive for 5 or more consecutive days', color: 'var(--theme-primary)' },
                             { icon: '✓', text: 'Your reward is paid out on the 1st of the following month', color: 'var(--theme-primary)' },
                         ].map((item, i) => (
@@ -371,7 +371,7 @@ export default function Settings({ profile, session, onSignOut, onReplayTutorial
                     <h3 style={cardTitle}>Reward eligibility rules</h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                         {[
-                            'Minimum of 7 successful days per month to qualify.',
+                            'Minimum of 7 successful days per month to qualify. A successful day means completing any 4 out of 5 habits.',
                             'No more than 5 consecutive inactive days.',
                             'Reward = min(points value, tier cap).',
                             'Rewards reset at the start of every month.',
