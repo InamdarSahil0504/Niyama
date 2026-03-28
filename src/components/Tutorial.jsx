@@ -164,26 +164,23 @@ export default function Tutorial({ onComplete }) {
 
                         {/* Buttons */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <button onClick={handleSkip}
-                                style={{ fontSize: '13px', color: 'var(--theme-text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                            <button onClick={handleSkip} style={{ fontSize: '13px', color: 'var(--theme-text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
                                 Skip tour
                             </button>
                             <div style={{ display: 'flex', gap: '8px' }}>
                                 {step > 0 && (
-                                    <button onClick={handleBack}
-                                        style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', borderRadius: '8px', padding: '8px 14px', fontSize: '13px', color: 'var(--theme-text-secondary)', cursor: 'pointer' }}>
-                                        ← Back
+                                    <button onClick={handleBack} style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', borderRadius: '8px', padding: '8px 14px', fontSize: '13px', color: 'var(--theme-text-secondary)', cursor: 'pointer' }}>
+                                        Back
                                     </button>
                                 )}
-                                <button onClick={handleNext}
-                                    style={{ background: 'var(--theme-primary)', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 20px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
-                                    {isLast ? 'Got it! 🎉' : 'Next →'}
+                                <button onClick={handleNext} style={{ background: 'var(--theme-primary)', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 20px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
+                                    {isLast ? 'Got it!' : 'Next'}
                                 </button>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </>
         )
     }
+}
