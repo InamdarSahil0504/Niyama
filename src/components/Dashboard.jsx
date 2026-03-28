@@ -12,9 +12,9 @@ import Tutorial from './Tutorial'
 const HABITS = [
     { key: 'wake_before_8', label: 'Wake before 7:30 AM', points: 100, penalty: 50 },
     { key: 'steps_over_5000', label: 'Steps 10,000 or more', points: 100, penalty: 75 },
-    { key: 'screen_under_2hrs', label: 'Screen time under 3 hrs', points: 100, penalty: 75 },
     { key: 'sleep_before_1030', label: 'Sleep by 10:30 PM', points: 100, penalty: 50 },
-    { key: 'active_heart_rate', label: '30 min active heart rate', points: 100, penalty: 0, flex: true },
+    { key: 'active_heart_rate', label: '30 min active heart rate', points: 100, penalty: 75 },
+    { key: 'screen_under_2hrs', label: 'Screen time under 3 hrs', points: 100, penalty: 0, flex: true },
 ]
 
 const TIER_CAPS = { free: 5, plus: 10, premium: 20 }
