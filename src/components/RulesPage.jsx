@@ -20,7 +20,7 @@ export default function RulesPage({ onContinue, showButton = true }) {
                     {[
                         { habit: 'Wake before 7:30 AM', complete: '+100 pts', incomplete: '-50 pts', flex: false },
                         { habit: 'Steps 10,000 or more', complete: '+100 pts', incomplete: '-75 pts', flex: false },
-                        { habit: 'Screen time under 2 hrs', complete: '+100 pts', incomplete: '-75 pts', flex: false },
+                        { habit: 'Screen time under 3 hrs', complete: '+100 pts', incomplete: '-75 pts', flex: false },
                         { habit: 'Sleep by 10:30 PM', complete: '+100 pts', incomplete: '-50 pts', flex: false },
                         { habit: '30 min active heart rate', complete: '+100 pts', incomplete: 'no penalty', flex: true },
                     ].map(item => (
