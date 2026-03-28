@@ -1306,9 +1306,9 @@ export default function Admin() {
                         ) : (
                             <div style={{ background: s.card, border: `1px solid ${s.cardBorder}`, borderRadius: '12px', overflow: 'hidden' }}>
                                 {/* Table header */}
-                                <div style={{ display: 'grid', gridTemplateColumns: exportMode ? '40px 40px 1fr 80px 60px 80px 100px 100px 100px' : '40px 1fr 80px 60px 80px 100px 100px 100px', gap: '0', padding: '12px 16px', borderBottom: `1px solid ${s.cardBorder}`, background: '#161d29' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: exportMode ? '40px 40px 1fr 80px 60px 80px 110px 100px' : '40px 1fr 80px 60px 80px 110px 100px', gap: '12px', padding: '12px 16px', borderBottom: `1px solid ${s.cardBorder}`, background: '#161d29' }}>
                                     {[...(exportMode ? ['☑'] : []), '#', 'Name', 'Gender', 'Age', 'Tier', 'Local Time', 'Status'].map(h => (
-                                        <p key={h} style={{ fontSize: '11px', fontWeight: '600', color: s.muted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</p>
+                                        <p key={h} style={{ fontSize: '11px', fontWeight: '600', color: s.muted, textTransform: 'uppercase', letterSpacing: '0.05em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{h}</p>
                                     ))}
                                 </div>
 
@@ -1331,7 +1331,7 @@ export default function Admin() {
                                                         await fetchUserMessages(user.id)
                                                     }
                                                 }}
-                                                style={{ display: 'grid', gridTemplateColumns: exportMode ? '40px 40px 1fr 80px 60px 80px 100px 100px 100px' : '40px 1fr 80px 60px 80px 110px 100px', gap: '0', padding: '14px 16px', borderBottom: `1px solid ${s.cardBorder}`, cursor: 'pointer', background: exportSelectedUsers.includes(user.id) ? '#1e3a2f' : fraud ? '#1a0a0a' : 'transparent', transition: 'background 0.15s' }}
+                                                style={{ display: 'grid', gridTemplateColumns: exportMode ? '40px 40px 1fr 80px 60px 80px 110px 100px' : '40px 1fr 80px 60px 80px 110px 100px', gap: '12px', gap: '0', padding: '14px 16px', borderBottom: `1px solid ${s.cardBorder}`, cursor: 'pointer', background: exportSelectedUsers.includes(user.id) ? '#1e3a2f' : fraud ? '#1a0a0a' : 'transparent', transition: 'background 0.15s' }}
                                                 onMouseEnter={e => e.currentTarget.style.background = exportSelectedUsers.includes(user.id) ? '#1e3a2f' : fraud ? '#2a0a0a' : '#252f3f'}
                                                 onMouseLeave={e => e.currentTarget.style.background = exportSelectedUsers.includes(user.id) ? '#1e3a2f' : fraud ? '#1a0a0a' : 'transparent'}>
                                                 {exportMode && (

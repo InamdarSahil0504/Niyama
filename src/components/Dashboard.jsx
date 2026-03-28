@@ -129,8 +129,11 @@ export default function Dashboard({ session }) {
         const { data: profileData } = await supabase.from('profiles').select('*').eq('id', userId).single()
         // Auto-detect and store timezone silently
         const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
-        if (detectedTimezone && profileData?.timezone !== detectedTimezone) {
-            await supabase.from('profiles').update({ timezone: detectedTimezone }).eq('id', userId)
+        const updates = {}
+        if (detectedTimezone && profileData?.timezone !== detectedTimezone) updates.timezone = detectedTimezone
+        if (session.user.email && profileData?.email !== session.user.email) updates.email = session.user.email
+        if (Object.keys(updates).length > 0) {
+            await supabase.from('profiles').update(updates).eq('id', userId)
         }
         if (profileData) {
             if (profileData.color_theme) applyTheme(profileData.color_theme)
