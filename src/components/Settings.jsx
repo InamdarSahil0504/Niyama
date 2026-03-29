@@ -243,7 +243,7 @@ export default function Settings({ profile, session, onSignOut, onReplayTutorial
                     <p style={{ ...bodyText, marginBottom: '12px' }}>To qualify for a reward each month you need to:</p>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         {[
-                            { icon: '✓', text: 'Complete at least 7 successful days — any 4 out of 5 habits counts as a successful day', color: 'var(--theme-primary)' },
+                            { icon: '✓', text: 'Complete the minimum successful days for your tier — Basic: 7 days, Plus and Premium: 5 days. Any 4 out of 5 habits counts as a successful day', color: 'var(--theme-primary)' },
                             { icon: '✓', text: 'Avoid being inactive for 5 or more consecutive days', color: 'var(--theme-primary)' },
                             { icon: '✓', text: 'Your reward is paid out on the 1st of the following month', color: 'var(--theme-primary)' },
                         ].map((item, i) => (
@@ -399,9 +399,9 @@ export default function Settings({ profile, session, onSignOut, onReplayTutorial
                 <button style={backBtn} onClick={() => setActivePage(null)}>← Back</button>
                 <h2 style={{ fontSize: '22px', fontWeight: '700', color: 'var(--theme-text)', marginBottom: '24px' }}>Subscription tiers</h2>
                 {[
-                    { name: 'Basic', price: '$0.99/month', cap: '$5.00', features: ['All 5 daily habits', 'Streak tracking', 'Up to $5.00 reward per month', '1 month free trial'] },
-                    { name: 'Plus', price: '$4.99/month', cap: '$10.00', features: ['All 5 daily habits', 'Streak tracking', 'Up to $10.00 reward per month', '1 month free trial'] },
-                    { name: 'Premium', price: '$14.99/month', cap: '$20.00', features: ['All 5 daily habits', 'Streak tracking', 'Up to $20.00 reward per month', '1 month free trial', '25-day streak bonus ($25)'] },
+                    { name: 'Basic', price: '$0.99/month', cap: '$5.00', features: ['All 5 daily habits', 'Streak tracking', 'Up to $5.00 reward per month', '1 month free trial', 'Qualify with 7 successful days/month'] },
+                    { name: 'Plus', price: '$4.99/month', cap: '$10.00', features: ['All 5 daily habits', 'Streak tracking', 'Up to $10.00 reward per month', '1 month free trial', 'Qualify with just 5 successful days/month'] },
+                    { name: 'Premium', price: '$14.99/month', cap: '$20.00', features: ['All 5 daily habits', 'Streak tracking', 'Up to $20.00 reward per month', '1 month free trial', 'Qualify with just 5 successful days/month', '25-day streak = flat $25 payout'] },
                 ].map(tier => (
                     <div key={tier.name} style={{ ...card, ...(tier.borderStyle || {}) }}>
                         {tier.badge && <span style={{ ...tier.badgeStyle, fontSize: '11px', fontWeight: '600', padding: '3px 10px', borderRadius: '20px', display: 'inline-block', marginBottom: '12px' }}>{tier.badge}</span>}

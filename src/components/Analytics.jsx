@@ -302,7 +302,7 @@ export default function Analytics({ profile, streak }) {
                 <p style={sectionTitle}>Reward eligibility</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {[
-                        { label: 'Minimum 7 successful days', met: successfulDays >= 7, text: successfulDays >= 7 ? '✓ Met' : `${7 - successfulDays} remaining` },
+                        { label: `Minimum ${profile?.tier === 'plus' || profile?.tier === 'premium' ? 5 : 7} successful days`, met: successfulDays >= (profile?.tier === 'plus' || profile?.tier === 'premium' ? 5 : 7), text: successfulDays >= (profile?.tier === 'plus' || profile?.tier === 'premium' ? 5 : 7) ? '✓ Met' : `${(profile?.tier === 'plus' || profile?.tier === 'premium' ? 5 : 7) - successfulDays} remaining` },
                         { label: 'No 5+ consecutive inactive days', met: (profile?.consecutive_inactive_days || 0) < 5, text: (profile?.consecutive_inactive_days || 0) < 5 ? '✓ Met' : '✗ Not met' },
                     ].map(item => (
                         <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

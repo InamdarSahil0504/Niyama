@@ -71,7 +71,7 @@ export default function RulesPage({ onContinue, showButton = true }) {
                 <h3 style={{ fontWeight: '600', color: 'var(--theme-text)', marginBottom: '16px' }}>Reward eligibility rules</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {[
-                        'Minimum of 7 successful days per month to qualify. A successful day means completing any 4 out of 5 habits.',
+                        'Minimum successful days to qualify: Basic = 7 days, Plus = 5 days, Premium = 5 days. A successful day means completing any 4 out of 5 habits.',
                         'No more than 5 consecutive inactive days. Exceeding this disqualifies you from rewards that month.',
                         'Reward = min(points value, tier cap). Points value = monthly points divided by 1,000.',
                         'Rewards reset at the start of every month. Points do not carry over.',

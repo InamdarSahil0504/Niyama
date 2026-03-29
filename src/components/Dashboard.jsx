@@ -41,9 +41,13 @@ function calcPoints(habits) {
     return Math.max(Math.min(points, 750), 0)
 }
 
+function getMinDays(tier) {
+    return tier === 'plus' || tier === 'premium' ? 5 : 7
+}
+
 function calcReward(monthlyPoints, tier, streakBonusUnlocked, successfulDays, consecutiveInactiveDays) {
     if (consecutiveInactiveDays >= 5) return '0.00'
-    if (successfulDays < 7) return '0.00'
+    if (successfulDays < getMinDays(tier)) return '0.00'
     if (streakBonusUnlocked && tier === 'premium') return '25.00'
     return Math.min(monthlyPoints / 1000, TIER_CAPS[tier] || 5).toFixed(2)
 }
@@ -325,7 +329,8 @@ export default function Dashboard({ session }) {
     const tierCap = streak?.streak_bonus_unlocked && profile?.tier === 'premium' ? 25 : TIER_CAPS[profile?.tier || 'free']
     const remaining = Math.max(tierCap - parseFloat(reward), 0).toFixed(2)
     const isInactive = (profile?.consecutive_inactive_days || 0) >= 5
-    const isEligible = successfulDays >= 7 && !isInactive
+    const minDays = getMinDays(profile?.tier)
+    const isEligible = successfulDays >= minDays && !isInactive
     const noneSelected = !Object.values(habits).some(v => v === true)
     const isFirstTimeUser = profile?.total_days_logged === 0 && !todayHabits?.submitted
     const tierLabel = profile?.tier === 'free' ? 'Basic' : profile?.tier ? profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1) : 'Basic'
@@ -490,10 +495,10 @@ export default function Dashboard({ session }) {
                         <div data-tutorial="eligibility" style={{ background: 'var(--theme-card)', border: '1px solid var(--theme-border)', borderRadius: '16px', padding: '16px', marginBottom: '16px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                                 <p style={{ fontSize: '13px', color: 'var(--theme-text-secondary)' }}>Progress to reward eligibility</p>
-                                <p style={{ fontSize: '13px', fontWeight: '600', color: 'var(--theme-primary)' }}>{successfulDays}/7</p>
+                                <p style={{ fontSize: '13px', fontWeight: '600', color: 'var(--theme-primary)' }}>{successfulDays}/{getMinDays(profile?.tier)}</p>
                             </div>
                             <div style={{ background: 'var(--theme-primary-light)', borderRadius: '4px', height: '8px' }}>
-                                <div style={{ background: 'var(--theme-primary)', borderRadius: '4px', height: '8px', width: `${Math.min(successfulDays / 7 * 100, 100)}%`, transition: 'width 0.3s' }} />
+                                <div style={{ background: 'var(--theme-primary)', borderRadius: '4px', height: '8px', width: `${Math.min(successfulDays / getMinDays(profile?.tier) * 100, 100)}%`, transition: 'width 0.3s' }} />
                             </div>
                             {isEligible ? (
                                 <div style={{ marginTop: '8px' }}>
@@ -501,7 +506,7 @@ export default function Dashboard({ session }) {
                                     <p style={{ fontSize: '12px', color: 'var(--theme-primary)', marginTop: '2px' }}>🎉 Congratulations! Keep going!</p>
                                 </div>
                             ) : (
-                                <p style={{ fontSize: '12px', color: 'var(--theme-text-muted)', marginTop: '6px' }}>{7 - successfulDays} more successful {7 - successfulDays === 1 ? 'day' : 'days'} needed</p>
+                                <p style={{ fontSize: '12px', color: 'var(--theme-text-muted)', marginTop: '6px' }}>{minDays - successfulDays} more successful {minDays - successfulDays === 1 ? 'day' : 'days'} needed</p>
                             )}
                         </div>
 

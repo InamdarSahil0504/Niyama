@@ -282,11 +282,15 @@ export default function Admin() {
         return rewards.find(r => r.user_id === userId && r.month === currentMonth)
     }
 
+    function getMinDays(tier) {
+        return tier === 'plus' || tier === 'premium' ? 5 : 7
+    }
+
     function calcReward(user) {
         const caps = { free: 5, plus: 10, premium: 20 }
         const streak = getStreak(user.id)
         if ((user.consecutive_inactive_days || 0) >= 5) return '0.00'
-        if ((user.successful_days || 0) < 7) return '0.00'
+        if ((user.successful_days || 0) < getMinDays(user.tier)) return '0.00'
         if (streak?.streak_bonus_unlocked && user.tier === 'premium') return '25.00'
         return Math.min((user.monthly_points || 0) / 1000, caps[user.tier] || 5).toFixed(2)
     }
@@ -538,7 +542,7 @@ export default function Admin() {
     const premiumUsers = users.filter(u => u.tier === 'premium').length
     const paidUsers = plusUsers + premiumUsers
     const estimatedRevenue = (plusUsers * 4.99 + premiumUsers * 14.99).toFixed(2)
-    const eligibleUsers = users.filter(u => (u.successful_days || 0) >= 7 && (u.consecutive_inactive_days || 0) < 5)
+    const eligibleUsers = users.filter(u => (u.successful_days || 0) >= (u.tier === 'plus' || u.tier === 'premium' ? 5 : 7) && (u.consecutive_inactive_days || 0) < 5)
     const caps = { free: 5, plus: 10, premium: 20 }
     const totalRewardLiability = eligibleUsers.reduce((sum, u) => sum + Math.min((u.monthly_points || 0) / 1000, caps[u.tier] || 5), 0).toFixed(2)
     const contributionMargin = (parseFloat(estimatedRevenue) - parseFloat(totalRewardLiability)).toFixed(2)
