@@ -105,7 +105,7 @@ export default function Dashboard({ session }) {
     const [activeTab, setActiveTab] = useState('home')
     const [habits, setHabits] = useState({ wake_before_8: false, screen_under_2hrs: false, steps_over_5000: false, sleep_before_1030: false, active_heart_rate: false })
 
-    const today = new Date().toISOString().split('T')[0]
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone })
     const now = new Date()
     const ENFORCE_DEADLINES = false
     const isPastWakeDeadline = ENFORCE_DEADLINES && (now.getHours() > 7 || (now.getHours() === 7 && now.getMinutes() >= 35))
@@ -158,7 +158,7 @@ export default function Dashboard({ session }) {
             // Auto-submit yesterday
             const yesterday = new Date()
             yesterday.setDate(yesterday.getDate() - 1)
-            const yesterdayStr = yesterday.toISOString().split('T')[0]
+            const yesterdayStr = new Date(yesterday).toLocaleDateString('en-CA', { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone })
             const { data: yHabits } = await supabase.from('habits').select('*').eq('user_id', userId).eq('date', yesterdayStr).single()
 
             if (yHabits && !yHabits.submitted) {
