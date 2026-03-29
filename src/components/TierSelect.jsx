@@ -33,9 +33,9 @@ const TIERS = [
             'All 5 daily habits',
             'Streak tracking',
             'Points system',
-            'Up to $5.00 reward per month',
+            'Up to $10.00 reward per month',
             '1 month free trial',
-            'Qualify with 7 successful days/month',
+            'Qualify with just 5 successful days/month',
         ],
         streakBonus: false,
     },
@@ -124,7 +124,15 @@ export default function TierSelect({ userId, onComplete }) {
                                 <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: '12px' }}>
                                     <p style={{ fontSize: '22px', fontWeight: '700', color: 'var(--theme-text)' }}>{tier.price}</p>
                                     <p style={{ fontSize: '12px', color: 'var(--theme-text-muted)' }}>{tier.priceNote}</p>
-                                    <p style={{ fontSize: '13px', fontWeight: '600', color: 'var(--theme-primary)', marginTop: '2px' }}>Up to {tier.cap}/mo{tier.key === 'premium' ? ' or flat $25 streak bonus' : ''}</p>
+                                    {tier.key === 'premium' ? (
+                                        <div style={{ marginTop: '2px', textAlign: 'right' }}>
+                                            <p style={{ fontSize: '13px', fontWeight: '600', color: 'var(--theme-primary)' }}>Up to {tier.cap}/mo</p>
+                                            <p style={{ fontSize: '11px', color: 'var(--theme-text-muted)', fontWeight: '500' }}>OR</p>
+                                            <p style={{ fontSize: '13px', fontWeight: '600', color: 'var(--theme-secondary)' }}>Flat $25 streak bonus</p>
+                                        </div>
+                                    ) : (
+                                        <p style={{ fontSize: '13px', fontWeight: '600', color: 'var(--theme-primary)', marginTop: '2px' }}>Up to {tier.cap}/mo</p>
+                                    )}
                                 </div>
                             </div>
 
@@ -139,10 +147,10 @@ export default function TierSelect({ userId, onComplete }) {
                                         <span style={{ fontSize: '13px', color: 'var(--theme-text-secondary)' }}>{f}</span>
                                     </div>
                                 ))}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '2px' }}>
                                     <span style={{ fontSize: '13px', flexShrink: 0 }}>🏆</span>
-                                    <span style={{ fontSize: '13px', color: tier.streakBonus ? 'var(--theme-secondary)' : 'var(--theme-text-muted)', fontWeight: tier.streakBonus ? '500' : '400' }}>
-                                        25-day streak = flat $25 payout {!tier.streakBonus && '(Premium only)'}
+                                    <span style={{ fontSize: '13px', fontWeight: '700', color: tier.streakBonus ? 'var(--theme-secondary)' : 'var(--theme-text-muted)' }}>
+                                        25-day streak = flat $25 payout{!tier.streakBonus ? ' (Premium only)' : ''}
                                     </span>
                                 </div>
                             </div>

@@ -410,8 +410,15 @@ export default function Settings({ profile, session, onSignOut, onReplayTutorial
                             <div style={{ textAlign: 'right' }}>
                                 <p style={{ fontSize: '22px', fontWeight: '700', color: 'var(--theme-text)' }}>{tier.price}</p>
                                 <p style={{ fontSize: '12px', color: 'var(--theme-text-muted)' }}>{tier.note}</p>
-                                <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--theme-primary)', marginTop: '2px' }}>Up to {tier.cap}/mo{tier.name === 'Premium' ? ' or flat $25 streak bonus' : ''}</p>
-                            </div>
+                                {tier.name === 'Premium' ? (
+                                    <div style={{ marginTop: '2px' }}>
+                                        <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--theme-primary)' }}>Up to {tier.cap}/mo</p>
+                                        <p style={{ fontSize: '11px', color: 'var(--theme-text-muted)', fontWeight: '500' }}>OR</p>
+                                        <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--theme-secondary)' }}>Flat $25 streak bonus</p>
+                                    </div>
+                                ) : (
+                                    <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--theme-primary)', marginTop: '2px' }}>Up to {tier.cap}/mo</p>
+                                )}                            </div>
                         </div>
                         {tier.features.map(f => (
                             <div key={f} style={{ display: 'flex', gap: '8px', marginBottom: '4px' }}>
