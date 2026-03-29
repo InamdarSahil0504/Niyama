@@ -124,7 +124,7 @@ export default function TierSelect({ userId, onComplete }) {
                                 <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: '12px' }}>
                                     <p style={{ fontSize: '22px', fontWeight: '700', color: 'var(--theme-text)' }}>{tier.price}</p>
                                     <p style={{ fontSize: '12px', color: 'var(--theme-text-muted)' }}>{tier.priceNote}</p>
-                                    <p style={{ fontSize: '13px', fontWeight: '600', color: 'var(--theme-primary)', marginTop: '2px' }}>Up to {tier.cap}/mo</p>
+                                    <p style={{ fontSize: '13px', fontWeight: '600', color: 'var(--theme-primary)', marginTop: '2px' }}>Up to {tier.cap}/mo{tier.key === 'premium' ? ' or flat $25 streak bonus' : ''}</p>
                                 </div>
                             </div>
 
@@ -139,17 +139,12 @@ export default function TierSelect({ userId, onComplete }) {
                                         <span style={{ fontSize: '13px', color: 'var(--theme-text-secondary)' }}>{f}</span>
                                     </div>
                                 ))}
-                                {tier.streakBonus ? (
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <span style={{ fontSize: '13px', flexShrink: 0 }}>🏆</span>
-                                        <span style={{ fontSize: '13px', color: 'var(--theme-secondary)', fontWeight: '500' }}>25-day streak = flat $25 payout</span>
-                                    </div>
-                                ) : (
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <span style={{ color: 'var(--theme-text-muted)', fontSize: '13px', flexShrink: 0 }}>✗</span>
-                                        <span style={{ fontSize: '13px', color: 'var(--theme-text-muted)' }}>25-day streak bonus not available</span>
-                                    </div>
-                                )}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <span style={{ fontSize: '13px', flexShrink: 0 }}>🏆</span>
+                                    <span style={{ fontSize: '13px', color: tier.streakBonus ? 'var(--theme-secondary)' : 'var(--theme-text-muted)', fontWeight: tier.streakBonus ? '500' : '400' }}>
+                                        25-day streak = flat $25 payout {!tier.streakBonus && '(Premium only)'}
+                                    </span>
+                                </div>
                             </div>
 
                             {/* Selected indicator */}

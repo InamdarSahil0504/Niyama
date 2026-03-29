@@ -410,7 +410,7 @@ export default function Settings({ profile, session, onSignOut, onReplayTutorial
                             <div style={{ textAlign: 'right' }}>
                                 <p style={{ fontSize: '22px', fontWeight: '700', color: 'var(--theme-text)' }}>{tier.price}</p>
                                 <p style={{ fontSize: '12px', color: 'var(--theme-text-muted)' }}>{tier.note}</p>
-                                <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--theme-primary)', marginTop: '2px' }}>Up to {tier.cap}/mo</p>
+                                <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--theme-primary)', marginTop: '2px' }}>Up to {tier.cap}/mo{tier.name === 'Premium' ? ' or flat $25 streak bonus' : ''}</p>
                             </div>
                         </div>
                         {tier.features.map(f => (
@@ -419,10 +419,12 @@ export default function Settings({ profile, session, onSignOut, onReplayTutorial
                                 <span style={{ fontSize: '13px', color: 'var(--theme-text-secondary)' }}>{f}</span>
                             </div>
                         ))}
-                        {tier.streakBonus
-                            ? <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}><span>🏆</span><span style={{ fontSize: '13px', color: 'var(--theme-secondary)', fontWeight: '500' }}>25-day streak = flat $25 payout</span></div>
-                            : <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}><span style={{ color: 'var(--theme-text-muted)', fontSize: '12px' }}>✗</span><span style={{ fontSize: '13px', color: 'var(--theme-text-muted)' }}>25-day streak bonus not available</span></div>
-                        }
+                        <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                            <span>🏆</span>
+                            <span style={{ fontSize: '13px', color: tier.streakBonus ? 'var(--theme-secondary)' : 'var(--theme-text-muted)', fontWeight: tier.streakBonus ? '500' : '400' }}>
+                                25-day streak = flat $25 payout {!tier.streakBonus && '(Premium only)'}
+                            </span>
+                        </div>
                     </div>
                 ))}
                 <div style={{ background: '#fffbeb', border: '1px solid #fcd34d', borderRadius: '16px', padding: '20px' }}>
