@@ -1363,64 +1363,69 @@ export default function Admin() {
                                                     <p style={{ fontSize: '10px', color: s.muted }}>{user.timezone ? formatTimezone(user.timezone) : '—'}</p>
                                                 </div>
                                                 <span style={{ fontSize: '11px', fontWeight: '500', color: getStatusColor(status), textTransform: 'capitalize' }}>{status}</span>
-                                                <span style={{ fontSize: '11px', fontWeight: '500', color: getStatusColor(status), textTransform: 'capitalize' }}>{status}</span>
                                             </div>
                                         )
                                     })
                                 )}
                             </div>
                         )}
-                        {/* ─── MESSAGES TAB ──────────────────────────────────────────────────── */}
-                        {activeTab === 'messages' && (
-                            <div>
-                                {unreadCount === 0 && (
-                                    <div style={{ textAlign: 'center', padding: '48px 24px' }}>
-                                        <p style={{ fontSize: '32px', marginBottom: '12px' }}>💬</p>
-                                        <p style={{ fontSize: '16px', fontWeight: '600', color: s.text, marginBottom: '6px' }}>No unread messages</p>
-                                        <p style={{ fontSize: '14px', color: s.muted }}>All conversations are up to date</p>
-                                    </div>
+                        <div>
+                            {unreadCount === 0 && (
+                                <div style={{ textAlign: 'center', padding: '48px 24px' }}>
+                                    <p style={{ fontSize: '32px', marginBottom: '12px' }}>💬</p>
+                                    <p style={{ fontSize: '16px', fontWeight: '600', color: s.text, marginBottom: '6px' }}>No unread messages</p>
+                                    <p style={{ fontSize: '14px', color: s.muted }}>All conversations are up to date</p>
+                                </div>
+                            )}
+                            {users.filter(u => {
+                                const msgs = userMessages.filter(m => m.user_id === u.id)
+                                return msgs.some(m => !m.read_by_admin && m.sender === 'user')
+                            }).length === 0 && unreadCount > 0 && (
+                                    <p style={{ color: s.muted, fontSize: '14px' }}>Loading conversations...</p>
                                 )}
-                                {users.filter(u => {
-                                    const msgs = userMessages.filter(m => m.user_id === u.id)
-                                    return msgs.some(m => !m.read_by_admin && m.sender === 'user')
-                                }).length === 0 && unreadCount > 0 && (
-                                        <p style={{ color: s.muted, fontSize: '14px' }}>Loading conversations...</p>
-                                    )}
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                    {users.map(user => {
-                                        const hasUnread = userMessages.some(m => m.user_id === user.id && !m.read_by_admin && m.sender === 'user')
-                                        const lastMessage = userMessages.filter(m => m.user_id === user.id).sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0]
-                                        if (!lastMessage) return null
-                                        return (
-                                            <div key={user.id}
-                                                onClick={async () => { setSelectedUser(user); await fetchAdminNotes(user.id); await fetchUserMessages(user.id); setActiveTab('users') }}
-                                                style={{ background: s.card, border: `1px solid ${hasUnread ? s.danger : s.cardBorder}`, borderRadius: '12px', padding: '16px', cursor: 'pointer', display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
-                                                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: hasUnread ? '#450a0a' : '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', fontWeight: '700', color: hasUnread ? '#fca5a5' : s.muted, flexShrink: 0 }}>
-                                                    {user.full_name?.charAt(0).toUpperCase() || '?'}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                {users.map(user => {
+                                    const hasUnread = userMessages.some(m => m.user_id === user.id && !m.read_by_admin && m.sender === 'user')
+                                    const lastMessage = userMessages.filter(m => m.user_id === user.id).sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0]
+                                    if (!lastMessage) return null
+                                    return (
+                                        <div key={user.id}
+                                            onClick={async () => { setSelectedUser(user); await fetchAdminNotes(user.id); await fetchUserMessages(user.id); setActiveTab('users') }}
+                                            style={{ background: s.card, border: `1px solid ${hasUnread ? s.danger : s.cardBorder}`, borderRadius: '12px', padding: '16px', cursor: 'pointer', display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+                                            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: hasUnread ? '#450a0a' : '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', fontWeight: '700', color: hasUnread ? '#fca5a5' : s.muted, flexShrink: 0 }}>
+                                                {user.full_name?.charAt(0).toUpperCase() || '?'}
+                                            </div>
+                                            <div style={{ flex: 1, minWidth: 0 }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                                                    <p style={{ fontSize: '14px', fontWeight: '600', color: s.text }}>{user.full_name || 'Unknown'}</p>
+                                                    <p style={{ fontSize: '11px', color: s.muted }}>{new Date(lastMessage.created_at).toLocaleDateString()}</p>
                                                 </div>
-                                                <div style={{ flex: 1, minWidth: 0 }}>
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                                                        <p style={{ fontSize: '14px', fontWeight: '600', color: s.text }}>{user.full_name || 'Unknown'}</p>
-                                                        <p style={{ fontSize: '11px', color: s.muted }}>{new Date(lastMessage.created_at).toLocaleDateString()}</p>
-                                                    </div>
-                                                    <p style={{ fontSize: '13px', color: hasUnread ? '#fca5a5' : s.muted, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                        {lastMessage.sender === 'admin' ? 'You: ' : ''}{lastMessage.message}
-                                                    </p>
-                                                    {lastMessage.resolved && (
-                                                        <span style={{ fontSize: '11px', color: '#86efac', marginTop: '4px', display: 'inline-block' }}>✓ Resolved</span>
-                                                    )}
-                                                </div>
-                                                {hasUnread && (
-                                                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: s.danger, flexShrink: 0, marginTop: '4px' }} />
+                                                <p style={{ fontSize: '13px', color: hasUnread ? '#fca5a5' : s.muted, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                    {lastMessage.sender === 'admin' ? 'You: ' : ''}{lastMessage.message}
+                                                </p>
+                                                {lastMessage.resolved && (
+                                                    <span style={{ fontSize: '11px', color: '#86efac', marginTop: '4px', display: 'inline-block' }}>✓ Resolved</span>
                                                 )}
                                             </div>
-                                        )
-                                    }).filter(Boolean)}
-                                </div>
+                                            {hasUnread && (
+                                                <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: s.danger, flexShrink: 0, marginTop: '4px' }} />
+                                            )}
+                                        </div>
+                                    )
+                                }).filter(Boolean)}
                             </div>
+                        </div>
                         )}
                     </div>
                 )}
+
+                {/* ─── MESSAGES TAB ──────────────────────────────────────────────────── */}
+                {activeTab === 'messages' && (
+                    <div>
+                        ... messages content ...
+                    </div>
+                )}
+
                 {/* Column picker modal */}
                 {showColumnPicker && (
                     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
