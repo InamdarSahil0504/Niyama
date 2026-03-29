@@ -328,7 +328,7 @@ export default function Dashboard({ session }) {
     const isEligible = successfulDays >= 7 && !isInactive
     const noneSelected = !Object.values(habits).some(v => v === true)
     const isFirstTimeUser = profile?.total_days_logged === 0 && !todayHabits?.submitted
-    const tierLabel = profile?.tier ? profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1) : 'Free'
+    const tierLabel = profile?.tier === 'free' ? 'Basic' : profile?.tier ? profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1) : 'Basic'
 
     const NavIcon = ({ tab }) => {
         const icons = {

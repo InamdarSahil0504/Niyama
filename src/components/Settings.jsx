@@ -205,8 +205,9 @@ export default function Settings({ profile, session, onSignOut, onReplayTutorial
                         {[
                             { emoji: '🌅', habit: 'Wake before 7:30 AM', tip: 'Check this first thing when you wake up' },
                             { emoji: '👟', habit: 'Steps 10,000 or more', tip: 'Check this in the evening once you\'ve hit your step goal' },
-                            { emoji: '📵', habit: 'Screen time under 2 hrs', tip: 'Check this once your screen time is under 2 hours' },
+                            { emoji: '📵', habit: 'Screen time under 3 hrs', tip: 'Check this once your screen time is under 3 hours' },
                             { emoji: '🌙', habit: 'Sleep by 10:30 PM', tip: 'Check this before you wind down for the night' },
+                            { emoji: '❤️', habit: '30 min active heart rate', tip: 'Check this once you have completed 30 minutes of exercise with elevated heart rate' },
                         ].map(item => (
                             <div key={item.habit} style={{ display: 'flex', gap: '12px', padding: '10px', background: 'var(--theme-bg)', borderRadius: '10px' }}>
                                 <span style={{ fontSize: '18px', flexShrink: '0' }}>{item.emoji}</span>
@@ -398,9 +399,9 @@ export default function Settings({ profile, session, onSignOut, onReplayTutorial
                 <button style={backBtn} onClick={() => setActivePage(null)}>← Back</button>
                 <h2 style={{ fontSize: '22px', fontWeight: '700', color: 'var(--theme-text)', marginBottom: '24px' }}>Subscription tiers</h2>
                 {[
-                    { name: 'Free', price: '$0', note: 'forever', cap: '$5.00', badge: null, features: ['All 4 daily habits', 'Streak tracking', 'Up to $5 reward/month'], streakBonus: false },
-                    { name: 'Plus', price: '$4.99', note: '/month', cap: '$10.00', badge: 'Popular', badgeStyle: { background: 'var(--theme-primary-light)', color: 'var(--theme-primary)' }, borderStyle: { border: '2px solid var(--theme-primary)' }, features: ['All 4 daily habits', 'Streak tracking', 'Up to $10 reward/month'], streakBonus: false },
-                    { name: 'Premium', price: '$14.99', note: '/month', cap: '$20.00', badge: 'Best value', badgeStyle: { background: 'var(--theme-secondary-light)', color: 'var(--theme-secondary)' }, borderStyle: { border: '2px solid var(--theme-secondary)' }, features: ['All 4 daily habits', 'Streak tracking', 'Up to $20 reward/month'], streakBonus: true },
+                    { name: 'Basic', price: '$0.99/month', cap: '$5.00', features: ['All 5 daily habits', 'Streak tracking', 'Up to $5.00 reward per month', '1 month free trial'] },
+                    { name: 'Plus', price: '$4.99/month', cap: '$10.00', features: ['All 5 daily habits', 'Streak tracking', 'Up to $10.00 reward per month', '1 month free trial'] },
+                    { name: 'Premium', price: '$14.99/month', cap: '$20.00', features: ['All 5 daily habits', 'Streak tracking', 'Up to $20.00 reward per month', '1 month free trial', '25-day streak bonus ($25)'] },
                 ].map(tier => (
                     <div key={tier.name} style={{ ...card, ...(tier.borderStyle || {}) }}>
                         {tier.badge && <span style={{ ...tier.badgeStyle, fontSize: '11px', fontWeight: '600', padding: '3px 10px', borderRadius: '20px', display: 'inline-block', marginBottom: '12px' }}>{tier.badge}</span>}
@@ -419,7 +420,7 @@ export default function Settings({ profile, session, onSignOut, onReplayTutorial
                             </div>
                         ))}
                         {tier.streakBonus
-                            ? <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}><span>🏆</span><span style={{ fontSize: '13px', color: 'var(--theme-secondary)', fontWeight: '500' }}>25-day streak = $25 bonus</span></div>
+                            ? <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}><span>🏆</span><span style={{ fontSize: '13px', color: 'var(--theme-secondary)', fontWeight: '500' }}>25-day streak = flat $25 payout</span></div>
                             : <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}><span style={{ color: 'var(--theme-text-muted)', fontSize: '12px' }}>✗</span><span style={{ fontSize: '13px', color: 'var(--theme-text-muted)' }}>25-day streak bonus not available</span></div>
                         }
                     </div>
@@ -696,7 +697,7 @@ export default function Settings({ profile, session, onSignOut, onReplayTutorial
                             <p style={{ fontSize: '14px', color: 'var(--theme-text-secondary)', marginTop: '2px' }}>{session?.user?.email}</p>
                             <div style={{ display: 'flex', gap: '8px', marginTop: '6px', flexWrap: 'wrap' }}>
                                 <span style={{ background: 'var(--theme-primary)', color: 'white', fontSize: '11px', padding: '2px 10px', borderRadius: '20px', textTransform: 'capitalize' }}>
-                                    {profile?.tier || 'free'} plan
+                                    {profile?.tier === 'free' ? 'Basic' : profile?.tier ? profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1) : 'Basic'} plan
                                 </span>
                                 {getMemberDays() !== null && (
                                     <span style={{ background: 'var(--theme-bg)', color: 'var(--theme-text-secondary)', fontSize: '11px', padding: '2px 10px', borderRadius: '20px', border: '1px solid var(--theme-border)' }}>

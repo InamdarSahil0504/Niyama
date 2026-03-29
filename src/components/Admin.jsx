@@ -460,7 +460,7 @@ export default function Admin() {
                 row['Gender'] = u.gender || ''
                 row['Age'] = u.age || ''
                 row['Age Bracket'] = getAgeBracket(u.age)
-                row['Tier'] = u.tier || 'free'
+                row['Tier'] = u.tier === 'free' ? 'Basic' : u.tier || 'Basic'
                 row['Joined'] = u.created_at ? u.created_at.split('T')[0] : ''
                 row['Member Days'] = u.created_at ? Math.floor((new Date() - new Date(u.created_at)) / (1000 * 60 * 60 * 24)) : 0
                 row['Is Minor'] = u.is_minor ? 'Yes' : 'No'
@@ -652,7 +652,7 @@ export default function Admin() {
                         <p style={{ fontSize: '12px', color: s.muted, marginBottom: '6px' }}>Change tier</p>
                         <select value={user.tier || 'free'} onChange={e => { changeTier(user.id, e.target.value); setSelectedUser({ ...user, tier: e.target.value }) }}
                             style={{ ...inputStyle, width: 'auto' }}>
-                            <option value="free">Free</option>
+                            <option value="free">Basic</option>
                             <option value="plus">Plus</option>
                             <option value="premium">Premium</option>
                         </select>
@@ -970,7 +970,7 @@ export default function Admin() {
                             <div style={cardStyle}>
                                 <p style={{ fontSize: '11px', fontWeight: '600', color: s.muted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '16px' }}>Tier breakdown</p>
                                 {[
-                                    { label: 'Free', count: freeUsers, color: s.muted },
+                                    { label: 'Basic', count: freeUsers, color: s.muted },
                                     { label: 'Plus', count: plusUsers, color: s.info },
                                     { label: 'Premium', count: premiumUsers, color: s.warning },
                                 ].map(tier => (
@@ -1270,7 +1270,7 @@ export default function Admin() {
                             </div>
                             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                                 {[
-                                    { label: 'Tier', value: filterTier, setter: setFilterTier, options: ['all', 'free', 'plus', 'premium'] },
+                                    { label: 'Tier', value: filterTier, setter: setFilterTier, options: ['all', 'free', 'plus', 'premium'], labels: ['All Tiers', 'Basic', 'Plus', 'Premium'] },
                                     { label: 'Gender', value: filterGender, setter: setFilterGender, options: ['all', 'Male', 'Female', 'Other', 'Prefer not to say'] },
                                     { label: 'Age', value: filterAge, setter: setFilterAge, options: ['all', 'Under 18', '18-24', '25-34', '35-44', '45-54', '55+'] },
                                     { label: 'Status', value: filterStatus, setter: setFilterStatus, options: ['all', 'active', 'inactive', 'churned'] },
@@ -1279,8 +1279,8 @@ export default function Admin() {
                                         <span style={{ fontSize: '12px', color: s.muted }}>{filter.label}:</span>
                                         <select value={filter.value} onChange={e => filter.setter(e.target.value)}
                                             style={{ ...inputStyle, width: 'auto', padding: '6px 10px', fontSize: '12px' }}>
-                                            {filter.options.map(opt => (
-                                                <option key={opt} value={opt}>{opt === 'all' ? `All ${filter.label}s` : opt}</option>
+                                            {filter.options.map((opt, i) => (
+                                                <option key={opt} value={opt}>{filter.labels ? filter.labels[i] : opt === 'all' ? `All ${filter.label}s` : opt}</option>
                                             ))}
                                         </select>
                                     </div>
@@ -1353,7 +1353,7 @@ export default function Admin() {
                                                 </div>
                                                 <p style={{ fontSize: '13px', color: s.muted }}>{user.gender || '—'}</p>
                                                 <p style={{ fontSize: '13px', color: s.muted }}>{user.age || '—'}</p>
-                                                <span style={{ fontSize: '11px', fontWeight: '500', color: user.tier === 'premium' ? s.warning : user.tier === 'plus' ? s.info : s.muted, textTransform: 'capitalize' }}>{user.tier || 'free'}</span>
+                                                <span style={{ fontSize: '11px', fontWeight: '500', color: user.tier === 'premium' ? s.warning : user.tier === 'plus' ? s.info : s.muted, textTransform: 'capitalize' }}>{user.tier === 'free' ? 'Basic' : user.tier || 'Basic'}</span>
                                                 <div>
                                                     <p style={{ fontSize: '12px', color: s.primary, fontWeight: '500' }}>{getUserLocalTime(user.timezone)}</p>
                                                     <p style={{ fontSize: '10px', color: s.muted }}>{user.timezone ? formatTimezone(user.timezone) : '—'}</p>

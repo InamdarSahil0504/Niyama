@@ -4,17 +4,18 @@ import { supabase } from '../supabase'
 const TIERS = [
     {
         key: 'free',
-        name: 'Free',
-        price: '$0',
-        priceNote: 'forever',
+        name: 'Basic',
+        price: '$0.99',
+        priceNote: '/month',
         cap: '$5.00',
         badge: null,
-        description: 'Get started with habit tracking',
+        description: 'Start your health journey',
         features: [
-            'All 4 daily habits',
+            'All 5 daily habits',
             'Streak tracking',
             'Points system',
             'Up to $5.00 reward per month',
+            '1 month free trial',
         ],
         streakBonus: false,
     },
@@ -28,10 +29,11 @@ const TIERS = [
         badgeColor: { background: 'var(--theme-primary-light)', color: 'var(--theme-primary)' },
         description: 'Double your reward potential',
         features: [
-            'All 4 daily habits',
+            'All 5 daily habits',
             'Streak tracking',
             'Points system',
             'Up to $10.00 reward per month',
+            '1 month free trial',
         ],
         streakBonus: false,
     },
@@ -45,10 +47,11 @@ const TIERS = [
         badgeColor: { background: 'var(--theme-secondary-light)', color: 'var(--theme-secondary)' },
         description: 'Unlock the 25-day streak bonus',
         features: [
-            'All 4 daily habits',
+            'All 5 daily habits',
             'Streak tracking',
             'Points system',
             'Up to $20.00 reward per month',
+            '1 month free trial',
         ],
         streakBonus: true,
     },
@@ -136,7 +139,7 @@ export default function TierSelect({ userId, onComplete }) {
                                 {tier.streakBonus ? (
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                         <span style={{ fontSize: '13px', flexShrink: 0 }}>🏆</span>
-                                        <span style={{ fontSize: '13px', color: 'var(--theme-secondary)', fontWeight: '500' }}>25-day streak = $25 bonus payout</span>
+                                        <span style={{ fontSize: '13px', color: 'var(--theme-secondary)', fontWeight: '500' }}>25-day streak = flat $25 payout</span>
                                     </div>
                                 ) : (
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -166,6 +169,7 @@ export default function TierSelect({ userId, onComplete }) {
                         '✓ No subscription fees will be charged during beta',
                         '✓ No monetary rewards will be paid out during beta',
                         '✓ All tiers are fully functional during beta',
+                        '✓ Every plan includes a 1 month free trial at full launch',
                         '✓ Your selection carries over when the full version launches',
                     ].map((item, i) => (
                         <p key={i} style={{ fontSize: '12px', color: '#78350f' }}>{item}</p>
