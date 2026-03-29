@@ -1,5 +1,4 @@
 import { supabase } from '../supabase'
-import About from './About'
 import FounderStory from './FounderStory'
 import { useState, useEffect, useRef } from 'react'
 const FEEDBACK_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScGtdoAUJ-9JPWYeqbd2QH71qPXFJcERubHiSjvKOMxLc1cxw/viewform?usp=header'
@@ -165,7 +164,6 @@ export default function Settings({ profile, session, onSignOut, onReplayTutorial
 
     const menuItems = [
         { key: 'founder', label: "Founder's story", icon: '✨' },
-        { key: 'about', label: 'About Niyama', icon: '📖' },
         { key: 'getting-started', label: 'Getting started', icon: '🚀' },
         { key: 'rules', label: 'Rules and points system', icon: '📜' },
         { key: 'tiers', label: 'Subscription tiers', icon: '🏆' },
@@ -303,15 +301,6 @@ export default function Settings({ profile, session, onSignOut, onReplayTutorial
             <div style={pageStyle}>
                 <button style={backBtn} onClick={() => setActivePage(null)}>← Back</button>
                 <FounderStory minimal={true} showButton={false} />
-            </div>
-        )
-    }
-
-    if (activePage === 'about') {
-        return (
-            <div style={pageStyle}>
-                <button style={backBtn} onClick={() => setActivePage(null)}>← Back</button>
-                <About profile={profile} />
             </div>
         )
     }
