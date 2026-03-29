@@ -167,7 +167,7 @@ export default function Dashboard({ session }) {
                 let pts = 250
                 if (yHabits.wake_before_8) pts += 100; else pts -= 50
                 if (yHabits.steps_over_5000) pts += 100; else pts -= 75
-                if (yHabits.screen_under_2hrs) pts += 100; else pts -= 75
+                if (yHabits.screen_under_2hrs) pts += 100
                 if (yHabits.sleep_before_1030) pts += 100; else pts -= 50
                 if (yHabits.active_heart_rate) pts += 100
                 if (completedYesterday >= 4) pts += 100
@@ -229,7 +229,7 @@ export default function Dashboard({ session }) {
         const { data: allHabits } = await supabase.from('habits').select('day_successful, wake_before_8, steps_over_5000, screen_under_2hrs, sleep_before_1030').eq('user_id', userId)
         const overallSuccessfulDays = allHabits.filter(h => h.day_successful).length
         const totalDaysLogged = allHabits.length
-        const totalHabitsCompleted = allHabits.reduce((sum, h) => sum + (h.wake_before_8 ? 1 : 0) + (h.steps_over_5000 ? 1 : 0) + (h.screen_under_2hrs ? 1 : 0) + (h.sleep_before_1030 ? 1 : 0), 0)
+        const totalHabitsCompleted = allHabits.reduce((sum, h) => sum + (h.wake_before_8 ? 1 : 0) + (h.steps_over_5000 ? 1 : 0) + (h.screen_under_2hrs ? 1 : 0) + (h.sleep_before_1030 ? 1 : 0) + (h.active_heart_rate ? 1 : 0), 0)
 
         let newStreak = streak?.current_streak || 0
         let newLongest = streak?.longest_streak || 0
