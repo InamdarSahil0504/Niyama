@@ -333,16 +333,20 @@ export default function Admin() {
     }
 
     function getMinDays(tier) {
-        return tier === 'plus' || tier === 'premium' ? 5 : 7
+        if (tier === 'premium') return 5
+        if (tier === 'plus') return 7
+        if (tier === 'basic') return 10
+        return 0
     }
 
     function calcReward(user) {
-        const caps = { free: 5, plus: 10, premium: 20 }
+        const caps = { free: 0, basic: 5, plus: 10, premium: 20 }
         const streak = getStreak(user.id)
+        if (user.tier === 'free') return '0.00'
         if ((user.consecutive_inactive_days || 0) >= 5) return '0.00'
         if ((user.successful_days || 0) < getMinDays(user.tier)) return '0.00'
         if (streak?.streak_bonus_unlocked && user.tier === 'premium') return '25.00'
-        return Math.min((user.monthly_points || 0) / 1000, caps[user.tier] || 5).toFixed(2)
+        return Math.min((user.monthly_points || 0) / 1000, caps[user.tier] || 0).toFixed(2)
     }
 
     function isFraudSuspect(user) {
@@ -591,7 +595,7 @@ export default function Admin() {
     const plusUsers = users.filter(u => u.tier === 'plus').length
     const premiumUsers = users.filter(u => u.tier === 'premium').length
     const paidUsers = plusUsers + premiumUsers
-    const estimatedRevenue = (plusUsers * 4.99 + premiumUsers * 14.99).toFixed(2)
+    const estimatedRevenue = (users.filter(u => u.tier === 'basic').length * 0.99 + plusUsers * 4.99 + premiumUsers * 14.99).toFixed(2)
     const eligibleUsers = users.filter(u => (u.successful_days || 0) >= (u.tier === 'plus' || u.tier === 'premium' ? 5 : 7) && (u.consecutive_inactive_days || 0) < 5)
     const caps = { free: 5, plus: 10, premium: 20 }
     const totalRewardLiability = eligibleUsers.reduce((sum, u) => sum + Math.min((u.monthly_points || 0) / 1000, caps[u.tier] || 5), 0).toFixed(2)
@@ -706,7 +710,8 @@ export default function Admin() {
                         <p style={{ fontSize: '12px', color: s.muted, marginBottom: '6px' }}>Change tier</p>
                         <select value={user.tier || 'free'} onChange={e => { changeTier(user.id, e.target.value); setSelectedUser({ ...user, tier: e.target.value }) }}
                             style={{ ...inputStyle, width: 'auto' }}>
-                            <option value="free">Basic</option>
+                            <option value="free">Free</option>
+                            <option value="basic">Basic</option>
                             <option value="plus">Plus</option>
                             <option value="premium">Premium</option>
                         </select>
@@ -1043,9 +1048,10 @@ export default function Admin() {
                             <div style={cardStyle}>
                                 <p style={{ fontSize: '11px', fontWeight: '600', color: s.muted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '16px' }}>Tier breakdown</p>
                                 {[
-                                    { label: 'Basic', count: freeUsers, color: s.muted },
-                                    { label: 'Plus', count: plusUsers, color: s.info },
-                                    { label: 'Premium', count: premiumUsers, color: s.warning },
+                                    { label: 'Free', count: users.filter(u => u.tier === 'free' || !u.tier).length, color: s.dim },
+                                    { label: 'Basic', count: users.filter(u => u.tier === 'basic').length, color: s.muted },
+                                    { label: 'Plus', count: users.filter(u => u.tier === 'plus').length, color: s.info },
+                                    { label: 'Premium', count: users.filter(u => u.tier === 'premium').length, color: s.warning },
                                 ].map(tier => (
                                     <div key={tier.label} style={{ marginBottom: '10px' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
@@ -1343,7 +1349,7 @@ export default function Admin() {
                             </div>
                             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                                 {[
-                                    { label: 'Tier', value: filterTier, setter: setFilterTier, options: ['all', 'free', 'plus', 'premium'], labels: ['All Tiers', 'Basic', 'Plus', 'Premium'] },
+                                    { label: 'Tier', value: filterTier, setter: setFilterTier, options: ['all', 'free', 'basic', 'plus', 'premium'], labels: ['All Tiers', 'Free', 'Basic', 'Plus', 'Premium'] },
                                     { label: 'Gender', value: filterGender, setter: setFilterGender, options: ['all', 'Male', 'Female', 'Other', 'Prefer not to say'] },
                                     { label: 'Age', value: filterAge, setter: setFilterAge, options: ['all', 'Under 18', '18-24', '25-34', '35-44', '45-54', '55+'] },
                                     { label: 'Status', value: filterStatus, setter: setFilterStatus, options: ['all', 'active', 'inactive', 'churned'] },

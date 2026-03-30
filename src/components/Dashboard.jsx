@@ -17,8 +17,7 @@ const HABITS = [
     { key: 'screen_under_2hrs', label: 'Screen time under 3 hrs', points: 100, penalty: 0, flex: true },
 ]
 
-const TIER_CAPS = { free: 5, plus: 10, premium: 20 }
-
+const TIER_CAPS = { free: 0, basic: 5, plus: 10, premium: 20 }
 function calcLivePoints(habits) {
     let points = 250
     HABITS.forEach(h => { if (habits[h.key]) points += h.points })
@@ -42,14 +41,18 @@ function calcPoints(habits) {
 }
 
 function getMinDays(tier) {
-    return tier === 'plus' || tier === 'premium' ? 5 : 7
+    if (tier === 'premium') return 5
+    if (tier === 'plus') return 7
+    if (tier === 'basic') return 10
+    return 0
 }
 
 function calcReward(monthlyPoints, tier, streakBonusUnlocked, successfulDays, consecutiveInactiveDays) {
+    if (tier === 'free') return '0.00'
     if (consecutiveInactiveDays >= 5) return '0.00'
     if (successfulDays < getMinDays(tier)) return '0.00'
     if (streakBonusUnlocked && tier === 'premium') return '25.00'
-    return Math.min(monthlyPoints / 1000, TIER_CAPS[tier] || 5).toFixed(2)
+    return Math.min(monthlyPoints / 1000, TIER_CAPS[tier] || 0).toFixed(2)
 }
 
 function applyTheme(theme) {
@@ -113,6 +116,8 @@ export default function Dashboard({ session }) {
     const [showCelebration, setShowCelebration] = useState(false)
     const [lastHabitCount, setLastHabitCount] = useState(0)
     const [showTutorial, setShowTutorial] = useState(false)
+    const [coachingMessage, setCoachingMessage] = useState('')
+    const [loadingCoaching, setLoadingCoaching] = useState(false)
     useEffect(() => { fetchData() }, [])
 
     const completedHabitCount = HABITS.filter(h => habits[h.key] === true).length
@@ -193,6 +198,9 @@ export default function Dashboard({ session }) {
             setTodayHabits(habitData)
             setHabits({ wake_before_8: habitData.wake_before_8, screen_under_2hrs: habitData.screen_under_2hrs, steps_over_5000: habitData.steps_over_5000, sleep_before_1030: habitData.sleep_before_1030, active_heart_rate: habitData.active_heart_rate || false })
         }
+
+        // Fetch AI coaching message
+        await fetchCoachingMessage(updatedProfile, streakData, habitData)
 
         setLoading(false)
     }
@@ -316,7 +324,42 @@ export default function Dashboard({ session }) {
             <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
         </div>
     )
+    async function fetchCoachingMessage(profileData, streakData, habitsData) {
+        if (!profileData) return
+        setLoadingCoaching(true)
+        try {
+            const completedToday = habitsData ? Object.entries(habitsData).filter(([k, v]) => v === true && k !== 'submitted').length : 0
+            const prompt = `You are a personal health coach for a behaviour change app called Niyama. Generate a single personalised coaching message for this user. Be direct, specific and science-informed. Maximum 2 sentences. Never be generic or hollow. Reference their actual data.
 
+User data:
+- First name: ${profileData.full_name?.split(' ')[0] || 'there'}
+- Current streak: ${streakData?.current_streak || 0} days
+- Successful days this month: ${profileData.successful_days || 0}
+- Total days logged: ${profileData.total_days_logged || 0}
+- Monthly points: ${profileData.monthly_points || 0}
+- Habits completed today so far: ${completedToday} of 5
+- Tier: ${profileData.tier || 'free'}
+- Today submitted already: ${habitsData?.submitted ? 'yes' : 'no'}
+
+Generate one coaching message. No greeting. No sign-off. Just the message.`
+
+            const response = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'claude-sonnet-4-20250514',
+                    max_tokens: 150,
+                    messages: [{ role: 'user', content: prompt }],
+                }),
+            })
+            const data = await response.json()
+            const message = data.content?.[0]?.text || ''
+            setCoachingMessage(message)
+        } catch (e) {
+            setCoachingMessage('')
+        }
+        setLoadingCoaching(false)
+    }
     // Onboarding
     if (onboardingStep === 'founder-story') return <FounderStory onContinue={() => setOnboardingStep('rules')} />
     if (onboardingStep === 'rules') return <RulesPage onContinue={async () => { await supabase.from('profiles').update({ rules_acknowledged: true }).eq('id', session.user.id); setOnboardingStep('personal-details') }} />
@@ -334,8 +377,7 @@ export default function Dashboard({ session }) {
     const isEligible = successfulDays >= minDays && !isInactive
     const noneSelected = !Object.values(habits).some(v => v === true)
     const isFirstTimeUser = profile?.total_days_logged === 0 && !todayHabits?.submitted
-    const tierLabel = profile?.tier === 'free' ? 'Basic' : profile?.tier ? profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1) : 'Basic'
-
+    const tierLabel = profile?.tier === 'free' ? 'Free' : profile?.tier === 'basic' ? 'Basic' : profile?.tier ? profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1) : 'Free'
     const NavIcon = ({ tab }) => {
         const icons = {
             home: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
@@ -489,6 +531,20 @@ export default function Dashboard({ session }) {
                                     </div>
                                 )}
 
+                            </div>
+                        )}
+                        {/* AI Coaching Message */}
+                        {(coachingMessage || loadingCoaching) && (
+                            <div style={{ background: 'var(--theme-card)', border: '1px solid var(--theme-border)', borderRadius: '16px', padding: '16px', marginBottom: '16px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--theme-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '14px' }}>🧬</div>
+                                <div style={{ flex: 1 }}>
+                                    <p style={{ fontSize: '11px', fontWeight: '600', color: 'var(--theme-primary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Your daily insight</p>
+                                    {loadingCoaching ? (
+                                        <div style={{ height: '14px', background: 'var(--theme-border)', borderRadius: '4px', width: '80%', animation: 'pulse 1.5s ease-in-out infinite' }} />
+                                    ) : (
+                                        <p style={{ fontSize: '14px', color: 'var(--theme-text-secondary)', lineHeight: '1.6' }}>{coachingMessage}</p>
+                                    )}
+                                </div>
                             </div>
                         )}
 
@@ -651,21 +707,52 @@ export default function Dashboard({ session }) {
                         {/* Rewards summary */}
                         <div data-tutorial="rewards-summary" style={{ background: 'var(--theme-card)', border: '1px solid var(--theme-border)', borderRadius: '16px', padding: '20px' }}>
                             <h2 style={{ fontSize: '17px', fontWeight: '600', color: 'var(--theme-text)', marginBottom: '16px' }}>Rewards</h2>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                {[
-                                    { label: 'Estimated reward', value: `$${reward}`, valueColor: 'var(--theme-primary)' },
-                                    { label: 'Reward cap', value: `$${tierCap}.00`, valueColor: 'var(--theme-text)' },
-                                    { label: 'Remaining cap', value: `$${remaining}`, valueColor: 'var(--theme-text)' },
-                                ].map(item => (
-                                    <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <span style={{ fontSize: '14px', color: 'var(--theme-text-secondary)' }}>{item.label}</span>
-                                        <span style={{ fontSize: '16px', fontWeight: '600', color: item.valueColor }}>{item.value}</span>
+
+                            {profile?.tier === 'free' ? (
+                                <div>
+                                    {/* Points value on free tier */}
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                                        <span style={{ fontSize: '14px', color: 'var(--theme-text-secondary)' }}>Points earned this month</span>
+                                        <span style={{ fontSize: '16px', fontWeight: '600', color: 'var(--theme-text)' }}>{profile?.monthly_points || 0}</span>
                                     </div>
-                                ))}
-                            </div>
-                            {isMinor && <div style={{ background: 'var(--theme-primary-light)', borderRadius: '8px', padding: '10px', marginTop: '12px' }}><p style={{ fontSize: '13px', textAlign: 'center', color: 'var(--theme-primary)' }}>Rewards available when you turn 18</p></div>}
-                            {!isMinor && isInactive && <div style={{ background: '#fef2f2', borderRadius: '8px', padding: '10px', marginTop: '12px' }}><p style={{ fontSize: '13px', textAlign: 'center', color: '#dc2626' }}>⚠️ Ineligible — more than 5 consecutive inactive days</p></div>}
-                            {streak?.streak_bonus_unlocked && profile?.tier === 'premium' && <div style={{ background: 'var(--theme-secondary-light)', borderRadius: '8px', padding: '10px', marginTop: '12px' }}><p style={{ fontSize: '13px', textAlign: 'center', color: 'var(--theme-secondary)', fontWeight: '500' }}>🏆 25-day streak bonus unlocked! Reward: $25</p></div>}
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                                        <span style={{ fontSize: '14px', color: 'var(--theme-text-secondary)' }}>Points value</span>
+                                        <span style={{ fontSize: '16px', fontWeight: '600', color: 'var(--theme-primary)' }}>${((profile?.monthly_points || 0) / 1000).toFixed(2)}</span>
+                                    </div>
+
+                                    {/* Upsell card */}
+                                    <div style={{ background: 'var(--theme-primary)', borderRadius: '12px', padding: '16px', color: 'white' }}>
+                                        <p style={{ fontSize: '13px', fontWeight: '700', marginBottom: '6px' }}>
+                                            💰 You've earned ${((profile?.monthly_points || 0) / 1000).toFixed(2)} this month
+                                        </p>
+                                        <p style={{ fontSize: '12px', opacity: '0.9', lineHeight: '1.6', marginBottom: '12px' }}>
+                                            Upgrade to Basic for $0.99/month and claim up to $5.00 in real cash rewards every month.
+                                        </p>
+                                        <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '8px', padding: '8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <span style={{ fontSize: '12px', fontWeight: '500' }}>Basic — $0.99/month</span>
+                                            <span style={{ fontSize: '12px', fontWeight: '700' }}>Up to $5.00/mo →</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                        {[
+                                            { label: 'Estimated reward', value: `$${reward}`, valueColor: 'var(--theme-primary)' },
+                                            { label: 'Reward cap', value: `$${tierCap}.00`, valueColor: 'var(--theme-text)' },
+                                            { label: 'Remaining cap', value: `$${remaining}`, valueColor: 'var(--theme-text)' },
+                                        ].map(item => (
+                                            <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <span style={{ fontSize: '14px', color: 'var(--theme-text-secondary)' }}>{item.label}</span>
+                                                <span style={{ fontSize: '16px', fontWeight: '600', color: item.valueColor }}>{item.value}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    {isMinor && <div style={{ background: 'var(--theme-primary-light)', borderRadius: '8px', padding: '10px', marginTop: '12px' }}><p style={{ fontSize: '13px', textAlign: 'center', color: 'var(--theme-primary)' }}>Rewards available when you turn 18</p></div>}
+                                    {!isMinor && isInactive && <div style={{ background: '#fef2f2', borderRadius: '8px', padding: '10px', marginTop: '12px' }}><p style={{ fontSize: '13px', textAlign: 'center', color: '#dc2626' }}>⚠️ Ineligible — more than 5 consecutive inactive days</p></div>}
+                                    {streak?.streak_bonus_unlocked && profile?.tier === 'premium' && <div style={{ background: 'var(--theme-secondary-light)', borderRadius: '8px', padding: '10px', marginTop: '12px' }}><p style={{ fontSize: '13px', textAlign: 'center', color: 'var(--theme-secondary)', fontWeight: '500' }}>🏆 25-day streak bonus unlocked! Reward: $25</p></div>}
+                                </div>
+                            )}
                         </div>
                     </>
                 )}
@@ -701,7 +788,9 @@ export default function Dashboard({ session }) {
                 </div>
             </div>
 
-            <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
-        </div>
+            <style>{`
+                @keyframes spin { to { transform: rotate(360deg) } }
+                @keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: 0.4 } }
+            `}</style>        </div>
     )
 }

@@ -388,9 +388,10 @@ export default function Settings({ profile, session, onSignOut, onReplayTutorial
                 <button style={backBtn} onClick={() => setActivePage(null)}>← Back</button>
                 <h2 style={{ fontSize: '22px', fontWeight: '700', color: 'var(--theme-text)', marginBottom: '24px' }}>Subscription tiers</h2>
                 {[
-                    { name: 'Basic', price: '$0.99/month', cap: '$5.00', features: ['All 5 daily habits', 'Streak tracking', 'Up to $5.00 reward per month', '1 month free trial', 'Qualify with 7 successful days/month'] },
-                    { name: 'Plus', price: '$4.99/month', cap: '$10.00', features: ['All 5 daily habits', 'Streak tracking', 'Up to $10.00 reward per month', '1 month free trial', 'Qualify with just 5 successful days/month'] },
-                    { name: 'Premium', price: '$14.99/month', cap: '$20.00', features: ['All 5 daily habits', 'Streak tracking', 'Up to $20.00 reward per month', '1 month free trial', 'Qualify with just 5 successful days/month', '25-day streak = flat $25 payout'] },
+                    { name: 'Free', price: '$0', cap: null, features: ['All 5 science-backed habits', 'Streak tracking and analytics', 'Points system — see what you would earn', 'No credit card required', 'No cash rewards'] },
+                    { name: 'Basic', price: '$0.99/month', cap: '$5.00', features: ['Everything in Free', 'Up to $5.00 cash reward per month', 'Qualify with 10 successful days/month', '1 month free trial'] },
+                    { name: 'Plus', price: '$4.99/month', cap: '$10.00', features: ['Everything in Free', 'Up to $10.00 cash reward per month', 'Qualify with just 7 successful days/month', '1 month free trial'] },
+                    { name: 'Premium', price: '$14.99/month', cap: '$20.00', features: ['Everything in Free', 'Up to $20.00 cash reward per month', 'Qualify with just 5 successful days/month', '1 month free trial', '25-day streak = flat $25 payout'] },
                 ].map(tier => (
                     <div key={tier.name} style={{ ...card, ...(tier.borderStyle || {}) }}>
                         {tier.badge && <span style={{ ...tier.badgeStyle, fontSize: '11px', fontWeight: '600', padding: '3px 10px', borderRadius: '20px', display: 'inline-block', marginBottom: '12px' }}>{tier.badge}</span>}
@@ -399,15 +400,19 @@ export default function Settings({ profile, session, onSignOut, onReplayTutorial
                             <div style={{ textAlign: 'right' }}>
                                 <p style={{ fontSize: '22px', fontWeight: '700', color: 'var(--theme-text)' }}>{tier.price}</p>
                                 <p style={{ fontSize: '12px', color: 'var(--theme-text-muted)' }}>{tier.note}</p>
-                                {tier.name === 'Premium' ? (
-                                    <div style={{ marginTop: '2px' }}>
-                                        <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--theme-primary)' }}>Up to {tier.cap}/mo</p>
-                                        <p style={{ fontSize: '11px', color: 'var(--theme-text-muted)', fontWeight: '500' }}>OR</p>
-                                        <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--theme-secondary)' }}>Flat $25 streak bonus</p>
-                                    </div>
+                                {tier.cap ? (
+                                    tier.name === 'Premium' ? (
+                                        <div style={{ marginTop: '2px' }}>
+                                            <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--theme-primary)' }}>Up to {tier.cap}/mo</p>
+                                            <p style={{ fontSize: '11px', color: 'var(--theme-text-muted)' }}>OR</p>
+                                            <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--theme-secondary)' }}>Flat $25 streak bonus</p>
+                                        </div>
+                                    ) : (
+                                        <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--theme-primary)', marginTop: '2px' }}>Up to {tier.cap}/mo</p>
+                                    )
                                 ) : (
-                                    <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--theme-primary)', marginTop: '2px' }}>Up to {tier.cap}/mo</p>
-                                )}                            </div>
+                                    <p style={{ fontSize: '13px', color: 'var(--theme-text-muted)', marginTop: '2px' }}>No payouts</p>
+                                )}                          </div>
                         </div>
                         {tier.features.map(f => (
                             <div key={f} style={{ display: 'flex', gap: '8px', marginBottom: '4px' }}>
@@ -444,10 +449,11 @@ export default function Settings({ profile, session, onSignOut, onReplayTutorial
                     <h3 style={cardTitle}>Why these 4 habits?</h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                         {[
-                            { emoji: '🌅', title: 'Waking before 7:30 AM', text: 'Early rising gives you quiet, uninterrupted time to set intentions, exercise, and prepare mentally for the day.' },
-                            { emoji: '👟', title: '10,000 steps daily', text: 'Walking 10,000 steps reduces heart disease risk, improves mood through endorphin release, and builds physical and mental resilience.' },
-                            { emoji: '📵', title: 'Screen time under 2 hours', text: 'Excessive screen time is linked to reduced attention spans, poor sleep quality, and increased anxiety. Limiting it protects your mental health.' },
-                            { emoji: '🌙', title: 'Sleep by 10:30 PM', text: 'Quality sleep is the foundation of everything. Sleeping before 10:30 PM aligns with your body\'s natural rhythm, improving memory, immunity and emotional regulation.' },
+                            { emoji: '🌅', title: 'Wake before 7:30 AM', text: 'Consistent wake time is the single most powerful regulator of your circadian rhythm — the biological clock governing cortisol, melatonin, metabolism and cognitive performance. Irregular wake times are directly linked to increased risk of depression, metabolic syndrome and cardiovascular disease. Andrew Huberman\'s research on morning light exposure shows that viewing sunlight within 30 minutes of waking sets your cortisol peak correctly for the entire day.' },
+                            { emoji: '👟', title: '10,000 steps daily', text: 'Daily walking is one of the most replicated interventions in preventive medicine. Studies show 10,000 steps per day reduces all-cause mortality by up to 40%, improves insulin sensitivity, lowers blood pressure and enhances cognitive function through BDNF — brain-derived neurotrophic factor, the molecule responsible for neuroplasticity and new neuron formation. You cannot out-supplement a sedentary lifestyle.' },
+                            { emoji: '📵', title: 'Screen time under 3 hours', text: 'Excessive screen exposure is a direct neurochemical intervention. Blue light after sunset suppresses melatonin by up to 50%, delaying sleep onset and reducing slow-wave sleep. Infinite scroll content is engineered to hijack dopamine reward circuits — the same pathways implicated in addiction. Chronic overstimulation of these circuits is associated with reduced attention span, elevated baseline anxiety and impaired impulse control. Limiting screen time is a daily act of neurological self-defence.' },
+                            { emoji: '🌙', title: 'Sleep by 10:30 PM', text: 'Matthew Walker\'s research at UC Berkeley established sleep as the most potent health intervention known to science. Sleep before midnight contains the highest concentration of slow-wave sleep — the stage critical for memory consolidation, cellular repair and metabolic waste clearance via the glymphatic system. Chronic late sleeping is associated with accelerated neurodegeneration, impaired immune function, hormonal dysregulation and dramatically elevated cancer risk. There is no biological function that does not benefit from adequate sleep.' },
+                            { emoji: '❤️', title: '30 min active heart rate', text: 'Zone 2 cardiovascular exercise — sustained elevated heart rate — is Peter Attia\'s foundational longevity intervention. It improves mitochondrial density, VO2 max, insulin sensitivity and glucose disposal. Critically, aerobic exercise is the only proven intervention that generates new neurons in the hippocampus — the brain region first destroyed by Alzheimer\'s disease. 30 minutes of elevated heart rate per day is not a fitness goal. It is a neurological preservation strategy.' },
                         ].map(item => (
                             <div key={item.title}>
                                 <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--theme-text)', marginBottom: '4px' }}>{item.emoji} {item.title}</p>
