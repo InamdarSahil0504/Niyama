@@ -79,6 +79,9 @@ export default function Admin() {
     const [resolvingConversation, setResolvingConversation] = useState(false)
     const [userMessages, setUserMessages] = useState([])
     const [loadingMessages, setLoadingMessages] = useState(false)
+    const [resetDayUserId, setResetDayUserId] = useState(null)
+    const [resetDayDate, setResetDayDate] = useState('')
+    const [resettingDay, setResettingDay] = useState(false)
 
     function handleLogin() {
         if (password === ADMIN_PASSWORD) { setAuthed(true); fetchData() }
@@ -248,7 +251,54 @@ export default function Admin() {
         setMessage('Monthly data reset')
         fetchData()
     }
+    async function resetDay(userId, date) {
+        if (!date) return
+        if (!confirm(`Reset habits for ${date}? This will delete that day's record and recalculate monthly totals.`)) return
+        setResettingDay(true)
 
+        // Delete the habit record for that date
+        await supabase.from('habits').delete().eq('user_id', userId).eq('date', date)
+
+        // Recalculate monthly points and successful days from remaining records
+        const currentMonthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+            .toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' })
+
+        const { data: monthHabits } = await supabase
+            .from('habits')
+            .select('points_earned, day_successful')
+            .eq('user_id', userId)
+            .gte('date', currentMonthStart)
+
+        const monthlyPoints = (monthHabits || []).reduce((sum, h) => sum + (h.points_earned || 0), 0)
+        const successfulDays = (monthHabits || []).filter(h => h.day_successful).length
+
+        // Recalculate all time stats
+        const { data: allHabits } = await supabase
+            .from('habits')
+            .select('day_successful, wake_before_8, steps_over_5000, screen_under_2hrs, sleep_before_1030, active_heart_rate')
+            .eq('user_id', userId)
+
+        const overallSuccessfulDays = (allHabits || []).filter(h => h.day_successful).length
+        const totalDaysLogged = (allHabits || []).length
+        const totalHabitsCompleted = (allHabits || []).reduce((sum, h) =>
+            sum + (h.wake_before_8 ? 1 : 0) + (h.steps_over_5000 ? 1 : 0) +
+            (h.screen_under_2hrs ? 1 : 0) + (h.sleep_before_1030 ? 1 : 0) +
+            (h.active_heart_rate ? 1 : 0), 0)
+
+        await supabase.from('profiles').update({
+            monthly_points: monthlyPoints,
+            successful_days: successfulDays,
+            overall_successful_days: overallSuccessfulDays,
+            total_days_logged: totalDaysLogged,
+            total_habits_completed: totalHabitsCompleted,
+        }).eq('id', userId)
+
+        setResetDayUserId(null)
+        setResetDayDate('')
+        setResettingDay(false)
+        setMessage(`Day ${date} reset successfully — monthly totals recalculated`)
+        fetchData()
+    }
     async function changeTier(userId, tier) {
         await supabase.from('profiles').update({ tier }).eq('id', userId)
         fetchData()
@@ -810,10 +860,29 @@ export default function Admin() {
                                 <button onClick={() => { setMessageUserId(null); setMessageText('') }} style={{ ...btn('#555', s.muted), flex: 1 }}>Cancel</button>
                             </div>
                         </div>
+                    ) : resetDayUserId === user.id ? (
+                        <div style={{ background: s.input, borderRadius: '8px', padding: '12px' }}>
+                            <p style={{ fontSize: '12px', color: s.muted, marginBottom: '10px' }}>Select a date to reset. The habit record for that day will be deleted and monthly totals will be recalculated.</p>
+                            <input type="date" value={resetDayDate}
+                                onChange={e => setResetDayDate(e.target.value)}
+                                max={new Date().toLocaleDateString('en-CA')}
+                                style={{ ...inputStyle, marginBottom: '10px' }} />
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <button onClick={() => resetDay(user.id, resetDayDate)}
+                                    disabled={!resetDayDate || resettingDay}
+                                    style={{ ...btn('#166534', '#86efac'), flex: 1, opacity: (!resetDayDate || resettingDay) ? 0.5 : 1 }}>
+                                    {resettingDay ? 'Resetting...' : 'Confirm reset'}
+                                </button>
+                                <button onClick={() => { setResetDayUserId(null); setResetDayDate('') }}
+                                    style={{ ...btn('#555', s.muted), flex: 1 }}>Cancel</button>
+                            </div>
+                        </div>
                     ) : (
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                             <button onClick={() => setAdjustUserId(user.id)} style={btn('#333', s.text)}>Adjust points</button>
                             <button onClick={() => setMessageUserId(user.id)} style={btn('#1e3a5f', '#93c5fd')}>Message user</button>
+                            <button onClick={() => { setResetDayUserId(user.id); setResetDayDate(new Date().toLocaleDateString('en-CA')) }}
+                                style={btn('#1a3a1a', '#86efac')}>Reset day</button>
                             <button onClick={() => resetMonthlyData(user.id)} style={btn('#450a0a', '#fca5a5')}>Reset month</button>
                         </div>
                     )}
