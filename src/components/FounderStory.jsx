@@ -17,25 +17,51 @@ export default function FounderStory({ onContinue, minimal = false, showButton =
             )}
 
             <div style={{ background: 'var(--theme-card)', border: '1px solid var(--theme-border)', borderRadius: '16px', padding: '24px', marginBottom: '24px' }}>
-                {[
-                    'Hi, my name is Sahil Inamdar and I am the founder of Niyama.',
-                    'Five years ago, as a young scientist with a PhD focusing on cancer immunotherapy, I embarked on my journey in the biotech industry with a primary purpose of developing cures for patients suffering from various diseases. I worked on devastating diseases we face like Sepsis, Traumatic Brain Injury, Rheumatoid Arthritis and cancers (currently being tested in clinical trials). Most recently, I have been trying to develop therapies for neurodegenerative diseases like Alzheimer\'s and Parkinson\'s. Every day in the lab I see what these diseases do to people — the loss of independence, of memory, and importantly the inability to recognise the faces they love.',
-                    'But as I spent years searching for cures, a question kept nagging at me: what if we never had to get here in the first place?',
-                    'See, I am a scientist by training and by passion. I spent months researching, combing through scientific journals and clinical studies looking for answers. What I found was both simple and profound. People who maintain consistent daily habits — regular sleep, physical activity, limited screen time — have dramatically lower risk of developing the diseases I work on every day.',
-                    'Yes! It is that simple. The data is not subtle. It is overwhelming. And yet most people are not doing it.',
-                    'So I asked myself: why? The answer isn\'t ignorance. Everyone knows exercise is good for them. The answer is motivation. Specifically, the absence of any real external incentive to stay consistent when life gets hard.',
-                    'Every habit app I found relied entirely on willpower. Streaks, badges, reminders. None of them changed the underlying economics of behavior. Skipping a habit costs nothing. So people skip.',
-                    'That\'s why I built Niyama. A system where discipline is measured, consistency is rewarded, and the rewards are real enough to actually change behavior. Not as a gimmick — but as a scientifically grounded intervention based on the same reinforcement principles we use in clinical research.',
-                    'The goal of Niyama is simple: Living healthy every single day — not for others, but for yourself.',
-                ].map((para, i) => (
-                    <p key={i} style={{ fontSize: '14px', lineHeight: '1.8', color: 'var(--theme-text)', fontStyle: 'italic', marginBottom: i < 8 ? '16px' : '0' }}>
-                        {para}
-                    </p>
-                ))}
 
+                {/* Opening — personal and grounding */}
+                <p style={{ fontSize: '14px', lineHeight: '1.8', color: 'var(--theme-text)', fontStyle: 'italic', marginBottom: '16px' }}>
+                    Hi, my name is Sahil Inamdar and I am the founder of Niyama.
+                </p>
+
+                {/* The scientific background */}
+                <p style={{ fontSize: '14px', lineHeight: '1.8', color: 'var(--theme-text)', fontStyle: 'italic', marginBottom: '16px' }}>
+                    Five years ago, as a young scientist with a PhD focusing on cancer immunotherapy, I embarked on my journey in the biotech industry with one purpose — developing cures for patients suffering from devastating diseases. I worked on Sepsis, Traumatic Brain Injury, Rheumatoid Arthritis and cancers currently being tested in clinical trials. Most recently, I have been focused on neurodegenerative diseases like Alzheimer's and Parkinson's. Every day in the lab I see what these diseases do to people — the loss of independence, of memory, and the inability to recognise the faces they love.
+                </p>
+
+                {/* The pivot question */}
+                <p style={{ fontSize: '14px', lineHeight: '1.8', color: 'var(--theme-text)', fontStyle: 'italic', marginBottom: '16px' }}>
+                    But as I spent years searching for cures, a question kept nagging at me: what if we never had to get here in the first place?
+                </p>
+
+                {/* The science of prevention */}
+                <p style={{ fontSize: '14px', lineHeight: '1.8', color: 'var(--theme-text)', fontStyle: 'italic', marginBottom: '16px' }}>
+                    The scientific literature is unambiguous. Sleep deprivation accelerates neurodegeneration. Sedentary behaviour drives metabolic disease. Chronic screen exposure disrupts dopamine and cortisol regulation. Irregular wake times destabilise the circadian rhythm — the biological clock governing nearly every cellular process in the body. The diseases I work on every day share a common foundation. And that foundation is built — or destroyed — by daily behaviour.
+                </p>
+
+                {/* The five habits */}
+                <p style={{ fontSize: '14px', lineHeight: '1.8', color: 'var(--theme-text)', fontStyle: 'italic', marginBottom: '16px' }}>
+                    The five habits in Niyama are not arbitrary. They were chosen because the evidence for each is overwhelming. Waking consistently before 7:30 AM. Reaching 10,000 steps. Limiting screen time to under 3 hours. Elevating your heart rate for 30 minutes. Being asleep before 10:30 PM. These are the highest-leverage daily behaviours known to science for extending healthspan and reducing the risk of the diseases I have spent my career trying to cure.
+                </p>
+
+                {/* The behaviour gap */}
+                <p style={{ fontSize: '14px', lineHeight: '1.8', color: 'var(--theme-text)', fontStyle: 'italic', marginBottom: '16px' }}>
+                    The problem was never that people didn't know this. The problem is that knowing something and doing it every single day are completely different challenges. Motivation fades. Willpower is finite. Every habit app I found relied entirely on streaks and badges — none of them changed the underlying economics of behaviour. Skipping a habit costs nothing. So people skip.
+                </p>
+
+                {/* The solution */}
+                <p style={{ fontSize: '14px', lineHeight: '1.8', color: 'var(--theme-text)', fontStyle: 'italic', marginBottom: '16px' }}>
+                    That's why I built Niyama. A daily discipline platform where your behaviour has real financial consequences. Consistency is rewarded. The rewards are real enough to actually change behaviour — not as a gimmick, but as a scientifically grounded intervention based on the same reinforcement principles we use in clinical research.
+                </p>
+
+                {/* The mission */}
+                <p style={{ fontSize: '14px', lineHeight: '1.8', color: 'var(--theme-text)', fontStyle: 'italic', marginBottom: '0' }}>
+                    The goal is simple. Living healthy every single day — not for others, but for yourself.
+                </p>
+
+                {/* Closing */}
                 <div style={{ borderTop: '1px solid var(--theme-border)', marginTop: '20px', paddingTop: '20px' }}>
                     <p style={{ fontSize: '14px', lineHeight: '1.8', color: 'var(--theme-text-secondary)' }}>
-                        Thank you for being one of our first beta testers. Your feedback and experience over the coming weeks will directly shape the future of Niyama. I am grateful you are here.
+                        Thank you for being one of our first beta testers. Your experience over the coming weeks will directly shape the future of Niyama. I am grateful you are here.
                     </p>
                     <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--theme-text)', marginTop: '12px' }}>
                         — Sahil Inamdar, Founder
