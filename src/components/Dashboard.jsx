@@ -221,7 +221,8 @@ export default function Dashboard({ session }) {
             await supabase.from('habits').insert({ user_id: userId, date: today, ...habits, day_successful: daySuccessful, points_earned: points, submitted: true })
         }
 
-        const currentMonthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0]
+        const now = new Date()
+        const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1).toLocaleDateString('en-CA', { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone })
         const { data: monthHabits } = await supabase.from('habits').select('points_earned').eq('user_id', userId).gte('date', currentMonthStart)
         const monthlyPoints = monthHabits.reduce((sum, h) => sum + h.points_earned, 0)
         const { data: successHabits } = await supabase.from('habits').select('day_successful').eq('user_id', userId).eq('day_successful', true).gte('date', currentMonthStart)
